@@ -5,8 +5,5 @@
   },
   "scripts": {
     "dev": "tailwind build style.css -i css/input.css -o css/app.css --watch"
-  },
-  "dependencies": {
-    "alpinejs": "^3.13.3"
   }
 }
