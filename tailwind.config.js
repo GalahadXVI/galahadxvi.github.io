@@ -4,12 +4,19 @@ module.exports = {
   darkMode: 'class',
   mode: 'jit',
   content: [
-      './*.html',
-      './blog/*.html'
+      './public/*.html',
+      './public/blog/*.html',
+      './src/*.html',
+      './src/pages/*.html'
   ],
   theme: {
-    extend: {},
+    extend: {
+
+    },
   },
-  plugins: [require('@tailwindcss/forms'), require('@tailwindcss/typography')],
+  plugins: [
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography')
+  ],
 }
 

@@ -5,6 +5,10 @@
     "tailwindcss": "^3.4.0"
   },
   "scripts": {
-    "dev": "tailwind build style.css -i css/input.css -o css/app.css --watch"
+    "dev": "tailwind build style.css -i public/css/input.css -o public/css/app.css --watch"
+  },
+  "dependencies": {
+    "jsdom": "^23.0.1",
+    "marked": "^11.1.0"
   }
 }
