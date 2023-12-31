@@ -4,7 +4,7 @@ title: Navigating the Pay-to-Win Debate: Insights from IdleMMO
 
 # Navigating the Pay-to-Win Debate: Insights from IdleMMO
 
-Since the public release of IdleMMO two weeks ago, I’ve frequently addressed questions about its monetisation strategy. Recognising that not everyone is aware of our previous discussions, I believe it’s important to clearly articulate the rationale, process, and broader context of IdleMMO’s monetisation approach. This will also help in assessing whether the game can be considered pay-to-win.
+Since the public release of IdleMMO two weeks ago, I’ve frequently addressed questions about its monetisation strategy. Recognising that not everyone is aware of our (Galahad Creative's) previous discussions, I believe it’s important to clearly articulate the rationale, process, and broader context of IdleMMO’s monetisation approach. This will also help in assessing whether the game can be considered pay-to-win.
 
 Before delving into the details, I want to clarify that this post is not an attempt to defend or justify any imbalances in the game, nor is it aimed at swaying opinions in our favour. Instead, my goal is to provide a fair, balanced, and unbiased analysis of what I refer to as ‘the pay-to-win conundrum’.
 
