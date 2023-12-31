@@ -1,0 +1,171 @@
+<!DOCTYPE html><html><head>
+    <title>GalahadXVI - Software Engineer</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0">
+    <link href="/css/app.css?v=1.1" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="description" content="Software engineer and founder of Galahad Creative, a software and game development studio.">
+    <script defer="" src="/js/alpine-3.13.3.min.js"></script>
+</head>
+
+<body class="bg-zinc-900 text-white" x-data="">
+    <header class="pointer-events-none relative z-50 flex flex-none flex-col">
+        <div class="top-0 z-10 h-16 pt-6">
+            <div class="sm:px-8 w-full">
+                <div class="mx-auto w-full max-w-7xl lg:px-8">
+                    <div class="relative px-4 sm:px-8 lg:px-12">
+                        <div class="mx-auto max-w-2xl lg:max-w-5xl">
+                            <div class="relative flex gap-4">
+                                <div class="flex flex-1 justify-center">
+                                    <nav class="pointer-events-auto block">
+                                        <ul class="flex rounded-full px-3 text-sm font-medium shadow-lg shadow-zinc-800/5 backdrop-blur bg-zinc-800/90 text-zinc-200 ring-white/10">
+                                            <li>
+                                                <a :class="{
+                                                    'hover:text-teal-400' : location.pathname != '/',
+                                                    'text-teal-500' : location.pathname == '/',
+                                                }" class="relative block px-3 py-2 transition" href="/">
+                                                    Home
+                                                    <span x-show="location.pathname == '/'" class="absolute inset-x-1 -bottom-px h-px bg-gradient-to-r from-teal-400/0 via-teal-400/40 to-teal-400/0"></span>
+                                                </a>
+                                            </li>
+                                            <li><a class="relative block px-3 py-2 transition" :class="{
+                                                        'hover:text-teal-400' : !window.location.href.includes('blog'),
+                                                        'text-teal-500' : window.location.href.includes('blog'),
+                                                    }" href="/blog">
+                                                    Blog
+                                                    <span x-show="window.location.href.includes('blog')" class="absolute inset-x-1 -bottom-px h-px bg-gradient-to-r from-teal-400/0 via-teal-400/40 to-teal-400/0"></span>
+                                                </a>
+                                            </li>
+                                            <li><a class="relative block px-3 py-2 transition" :class="{
+                                                    'hover:text-teal-400' : !window.location.href.includes('about'),
+                                                    'text-teal-500' : window.location.href.includes('about'),
+                                                }" href="/about">
+                                                About
+                                                <span x-show="window.location.href.includes('about')" class="absolute inset-x-1 -bottom-px h-px bg-gradient-to-r from-teal-400/0 via-teal-400/40 to-teal-400/0"></span>
+                                            </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div>
+        <div class="mx-auto max-w-2xl lg:max-w-2xl mt-12 px-4 pb-8">
+            <div id="page-content">
+
+<div class="prose prose-invert">
+    <h1 class="text-2xl text-white font-bold">About Me</h1>
+    <p>
+        I'm Michael Dawson, Software Engineer and Director for Galahad Creative. I'm not a big
+        fan of writing about myself so I'll try to stick to just the essentials.
+    </p>
+
+    <h1 class="text-2xl text-white font-bold">
+        History
+        <span class="inline-flex items-center rounded-md bg-green-500/10 px-2 py-1 text-xs font-medium text-green-400 ring-1 ring-inset ring-green-500/20">
+            2008 - 2016
+        </span>
+    </h1>
+    <p>
+        My journey started in 2008 after obsessively playing PBBG's (Persistant browser-based games)
+         - namely the ol' classics such as Torn, GangsterRPG, Boredest and SoulRaider.
+    </p>
+
+    <p> 
+        I decided to dive into game development and soon stumbled upon a PHP game engine called 'MCCodes,' 
+        popular for powering numerous games at that time. I ended up making a game and selling it for 50 quid
+        worth of Microsoft Points. Not too shabby, eh?
+    </p>
+
+    <p> 
+        Following that experience, I ventured into a diverse array of software projects. My journey took me 
+        through everything from game development to fitness tracking apps, and even cryptocurrency faucets.
+        While at university, I dedicated my dissertation to developing a search engine, complete with a 
+        unique algorithm I designed myself.
+    </p>
+
+    <h1 class="text-2xl text-white font-bold">
+        SimpleMMO
+        <span class="inline-flex items-center rounded-md bg-green-500/10 px-2 py-1 text-xs font-medium text-green-400 ring-1 ring-inset ring-green-500/20">
+            2017 - Present
+        </span>
+    </h1>
+
+    <p>
+        Back in 2017, I dove into creating SimpleMMO, a game that filled a void in the mobile PBBG 
+        (Persistent Browser-Based Game) scene. It started as a fun project to get to grips with the Laravel 
+        framework and, honestly, the initial code was extremely rough (some of it's still in there). 
+        After a casual launch on the Google Play Store, the game unexpectedly took off, getting 50 
+        downloads in a few days. Over time, I kept adding to it in my spare time, purely as a hobby.
+    </p>
+
+    <p>
+        Then 2020 hit, and COVID-19 changed everything. Gaming boomed during the lockdowns, and SimpleMMO 
+        was no exception, with downloads jumping from 60 to 6,000 a day. This sudden surge pushed me to 
+        upscale the game’s server resources massively. The growth was so immense that I left my regular 
+        job to focus on my company, Galahad Creative Limited. SimpleMMO has since hit over a million players, 
+        a huge achievement despite the game's shaky codebase. There have been a lot of challenges, for sure, 
+        but I'll dive more into that in an upcoming blog post.
+    </p>
+
+    <h1 class="text-2xl text-white font-bold">
+        Galahad Creative
+        <span class="inline-flex items-center rounded-md bg-green-500/10 px-2 py-1 text-xs font-medium text-green-400 ring-1 ring-inset ring-green-500/20">
+            2020 - Present
+        </span>
+    </h1>
+
+    <p>
+        Galahad Creative was founded with one guiding principle: simplicity. This philosophy is the heartbeat 
+        of our operation. Whenever we develop something, our top priority is ensuring it's straightforward, 
+        stylish, and a breeze to use.
+    </p>
+    <p>
+        Since Galahad Creative's inception, we've evolved from a solo venture to a dynamic team. We diversified 
+        into various software sectors beyond just gaming. In early 2023, we unveiled 'Smashr,' a cutting-edge 
+        issue tracking tool. It's designed for businesses to share their issue trackers with the public. 
+        Wrapping up the year, we launched 'IdleMMO.' The game has already surpassed our initial projections 
+        and gaining impressive momentum.
+    </p>
+
+    <h1 class="text-2xl text-white font-bold">Interests</h1>
+
+    <p>
+        Apart from my focus on software development, I'm deeply fascinated by Machine Learning and its 
+        intricate mechanics. Beyond the AI modules I've tackled in university, I've ventured into the realm of 
+        neural networks, primarily using Python. Additionally, I've been experimenting with OpenAI's GPT models, 
+        exploring their capabilities and nuances.
+    </p>
+
+    <p>
+        Outside of tech, I like to indulge in my machonistic tendencies by watching my local football 
+        team, Sunderland AFC.
+    </p>
+
+    <h1 class="text-2xl text-white font-bold">Why GalahadXVI (Galahad Sixteen)?</h1>
+
+    <p>
+        While setting up my username on a gaming platform, I found that 'Galahad I' all the way up to 'Galahad VI' 
+        were already claimed. In a moment of laziness, I chose not to follow the sequence and jumped ahead, 
+        landing on 'Galahad XVI'.
+    </p>
+
+</div></div>
+            <div class="prose prose-invert" id="markdown-content"></div>
+        </div>
+    </div>
+
+
+
+</body></html>
