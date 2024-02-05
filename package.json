@@ -8,6 +8,7 @@
     "dev": "tailwind build style.css -i public/css/input.css -o public/css/app.css --watch"
   },
   "dependencies": {
+    "highlight.js": "^11.9.0",
     "jsdom": "^23.0.1",
     "marked": "^11.1.0"
   }
