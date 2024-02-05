@@ -4,6 +4,9 @@ const path = require('path'); // Path module for handling file paths
 const jsdom = require('jsdom'); // jsdom module for DOM manipulation
 const { JSDOM } = jsdom; // Destructuring JSDOM for ease of use
 const execSync = require('child_process').execSync; // For executing shell commands synchronously
+const hljs = require('highlight.js/lib/core');
+hljs.registerLanguage('javascript', require('highlight.js/lib/languages/javascript'));
+hljs.registerLanguage('php', require('highlight.js/lib/languages/php'));
 
 /**
  * Extracts front matter from the content and removes it from the content.
