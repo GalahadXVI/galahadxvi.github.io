@@ -144,9 +144,9 @@ use App\Abstracts\MiddlewareCooldown;
 class CheckUserIP extends MiddlewareCooldown
 {
     /**
-     * The cooldown time in milliseconds.
+     * The cooldown time in milliseconds. Let's overwrite this to 30,000ms (30 seconds)
      */
-    protected int $cooldown;
+    protected int $cooldown = 30000;
 
     /**
      * Handle an incoming request.
@@ -181,7 +181,7 @@ class CheckUserIP extends MiddlewareCooldown
 
 ### Race Conditions
 
-Some keen observers might notice a potentially significant issue in the code - it lacks protection against race conditions. For those unfamiliar with the term, a race condition occurs when two requests run simultaneously, and both processes proceed independently because they are unaware of each other. While there are more intricacies to race conditions, this provides a general overview. The above code may suffice for the majority use cases, it's not suitable for mission-critical tasks or blocks of code that should only run once. 
+Some keen observers might notice a potentially significant issue in the code - it lacks protection against race conditions. For those unfamiliar with the term, a race condition occurs when two requests run simultaneously, and both processes proceed independently because they are unaware of each other. There are certainly more intricacies to race conditions but this general concept applies. The above code may suffice for the majority use cases, it's not suitable for mission-critical tasks or blocks of code that should only run once. 
 
 To tackle this problem, we can employ the Cache::lock method, which leverages atomic locks to guarantee that the cache operation runs only once. Note that atomic locks are only supported by `memcached`, `redis`, `dynamodb`, `database`, `file`, or `array` cache drivers.
 
