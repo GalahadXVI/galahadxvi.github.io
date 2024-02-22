@@ -17,7 +17,7 @@ Though I possess experience in mitigating common OWASP vulnerabilities such as S
 
 However, in June 2021, everything changed. I was awoken around 6 am by a message: 'The game is down.' While I had grown accustomed to encountering such issues during my system scaling efforts, this instance felt particularly unsettling. Despite employing my usual measures, I found them ineffective in resolving the problem. It wasn't long before the unsettling thought of a DDoS attack crossed my mind.
 
-I logged into CloudFlare to check the statistics. As I feared, the API endpoints were inundated with a staggering 1.2 million requests per minute. The sheer scale was unfathomable, and it became apparent that the system was ill-prepared to handle such an onslaught.
+I logged into CloudFlare to check the statistics. As I feared, some endpoints were inundated with a staggering 1.2 million requests per minute. The sheer scale was unfathomable, and it became apparent that the system was ill-prepared to handle such an onslaught.
 
 Interestingly, the DDoS attack targeted only the `/login` POST endpoint. Upon closer inspection of the requests, it became evident that this wasn't an email enumeration attack; rather, the attacker repeatedly sent the same dummy email address, indicating a clear intent to disrupt my game. With this understanding, I devised a straightforward strategy: leveraging Cloudflare's DDoS protection.
 
