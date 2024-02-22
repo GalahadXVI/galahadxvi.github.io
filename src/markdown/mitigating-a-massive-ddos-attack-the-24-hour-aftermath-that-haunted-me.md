@@ -23,7 +23,7 @@ Interestingly, the DDoS attack targeted only the `/login` POST endpoint. Upon cl
 
 Cloudflare's DDoS protection proved highly effective. The attack followed a distinct pattern, allowing me to implement countermeasures by filtering out these specific requests and redirecting them to Cloudflare for handling. By configuring Cloudflare's Web Application Firewall to manage all incoming requests to the `/login` endpoint, I successfully mitigated the attack.
 
-Upon activating the firewall, there was an immediate and dramatic decrease in requests to the game. It was a seamless solution that effectively stemmed the tide. However, despite this improvement, complaints persisted about server slowness. Initially, I attributed this to the server needing time to recover after enduring such a heavy load.
+Upon activating the firewall, there was an immediate and dramatic decrease in requests to the game. It was a seamless solution that effectively stopped the attack. However, despite this improvement, complaints persisted about the slowness of the server. Initially, I attributed this to the server needing time to recover after enduring such a heavy load.
 
 As I accessed the server to diagnose the sluggishness, I immediately noticed that the CPU load had been consistently hovering just below 100% since the DDoS attack. This perplexed me greatly because I had successfully mitigated the attack, yet the aftermath seemed more debilitating than the attack itself. I was utterly baffled as to the cause of this unexpected issue.
 
@@ -60,7 +60,7 @@ I implemented the indexes, waited for about 10 minutes, and checked for any impr
 
 As we delved deeper into the issue, it grew increasingly perplexing. Each change we made either had no discernible impact or exacerbated the problem.
 
-After roughly 6 hours of troubleshooting, we remained baffled by the root cause. We even deployed an Application Performance Manager (APM) to aid in diagnostics, but all results returned clean. The elusive issue continued to evade us.
+After roughly 6 hours of troubleshooting, we remained baffled by the root cause. We even deployed an Application Performance Monitor (APM) to aid in diagnostics, but all results returned clean. The elusive issue continued to evade us.
 
 In a final attempt to resolve the issue, we decided to migrate our server from Apache's `mod_php` to `PHP-FPM` and initiated a server restart. Almost immediately, we observed significant improvements. Everything was operating swiftly once more! `mod_php` must’ve been the issue.
 
@@ -82,7 +82,7 @@ As the clock struck 2 am, exhaustion weighed heavily upon me. I had been glued t
 -	Engaged a professional system administrator to assist in diagnosing the cause, but even he was just as baffled as I was.
 -	Upgraded the system's hardware by increasing the RAM and vCPU count.
 -	Migrated the server from Apache's `mod_php` to `PHP-FPM` for improved performance.
--	Installed an application package manager in an attempt to pinpoint the root cause of the issue.
+-	Installed an Application Performance Monitor in an attempt to pinpoint the root cause of the issue.
 
 At this point, I was starting to question if I had accidentally stumbled into a parallel universe. Nothing was making sense anymore, and each attempt to fix the issue seemed to make it worse. It was like being trapped in a world where every move I made only added to the confusion.
 
@@ -96,7 +96,7 @@ While trawling the output, I stumbled upon a strange observation. The response r
 
 The realization immediately struck me. The culprit lay in the Laravel sessions, which were being processed by the session system. During the onslaught of the DDoS attack on the login endpoint, a new session was generated with each unique request. Since we were using the file driver for storing user sessions at that time, a corresponding file was created on the server to manage these sessions. Consequently, the `/storage/framework/sessions ` directory was inundated with millions of these minuscule files. Due to the small size of the files, they did not significantly impact the servers storage space, thus escaping detection.
 
-In Laravel, when employing the File session driver, as there is no built-in mechanism to purge expired sessions, it resorts to a "Session Sweeping Lottery." This entails that, for every X requests to the server, the system traverses all sessions within the `/storage/framework/sessions` directory and deletes those that have expired. However, the issue arises when dealing with a high number of session files, such as a literal million (in our case).
+In Laravel, when employing the `File` session driver, as there is no built-in mechanism to purge expired sessions, it resorts to a "Session Sweeping Lottery." This entails that, for every X requests to the server, the system traverses all sessions within the `/storage/framework/sessions` directory and deletes those that have expired. However, the issue arises when dealing with a high number of session files, such as a literal million (in our case).
 
 Essentially, every 1 out of 100 requests had to sift through millions of session files to verify their expiry status. With our sessions configured to expire after 24 hours, this resulted in a significant accumulation of sessions generated during the DDoS attack.
 
@@ -108,7 +108,7 @@ Whether the perpetrator had exploited this vulnerability knowingly remains uncer
 
 ## Conclusion
 
-Despite the immense toll that day took on me, I don't regret experiencing it. In fact, the lessons from it were invaluable. Not only did I acquire proficiency in leveraging CloudFlare to mitigate DDoS attacks, but I also honed my skills in optimizing database indexes, mastering the utilization of application package managers, and deepening my understanding of Laravel's intricacies.
+Despite the immense toll that day took on me, I don't regret experiencing it. In fact, the lessons from it were invaluable. Not only did I acquire proficiency in leveraging CloudFlare to mitigate DDoS attacks, but I also honed my skills in optimizing database indexes, mastering the utilization of Application Performance Monitors, and deepening my understanding of Laravel's intricacies.
 
 <script defer src="https://cdn.commento.io/js/commento.js"></script>
 <div id="commento"></div>
