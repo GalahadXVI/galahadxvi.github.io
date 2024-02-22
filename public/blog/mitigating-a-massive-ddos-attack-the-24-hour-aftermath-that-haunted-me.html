@@ -1,0 +1,135 @@
+<!DOCTYPE html><html><head>
+    <title>Mitigating A Massive Ddos Attack The 24 Hour Aftermath That Haunted Me</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0">
+    <link href="/css/app.css?v=1.1" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="description" content="Software engineer and founder of Galahad Creative, a software and game development studio.">
+    <meta property="og:image" content="https://www.galahadsixteen.com/og-image.jpg">
+    <script defer="" src="/js/alpine-3.13.3.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+</head>
+
+<body class="bg-zinc-900 text-white" x-data="">
+    <header class="pointer-events-none relative z-50 flex flex-none flex-col">
+        <div class="top-0 z-10 h-16 pt-6">
+            <div class="sm:px-8 w-full">
+                <div class="mx-auto w-full max-w-7xl lg:px-8">
+                    <div class="relative px-4 sm:px-8 lg:px-12">
+                        <div class="mx-auto max-w-2xl lg:max-w-5xl">
+                            <div class="relative flex gap-4">
+                                <div class="flex flex-1 justify-center">
+                                    <nav class="pointer-events-auto block">
+                                        <ul class="flex rounded-full px-3 text-sm font-medium shadow-lg shadow-zinc-800/5 backdrop-blur bg-zinc-800/90 text-zinc-200 ring-white/10">
+                                            <li>
+                                                <a :class="{
+                                                    'hover:text-teal-400' : location.pathname != '/',
+                                                    'text-teal-500' : location.pathname == '/',
+                                                }" class="relative block px-3 py-2 transition" href="/">
+                                                    Home
+                                                    <span x-show="location.pathname == '/'" class="absolute inset-x-1 -bottom-px h-px bg-gradient-to-r from-teal-400/0 via-teal-400/40 to-teal-400/0"></span>
+                                                </a>
+                                            </li>
+                                            <li><a class="relative block px-3 py-2 transition" :class="{
+                                                        'hover:text-teal-400' : !window.location.href.includes('blog'),
+                                                        'text-teal-500' : window.location.href.includes('blog'),
+                                                    }" href="/blog">
+                                                    Blog
+                                                    <span x-show="window.location.href.includes('blog')" class="absolute inset-x-1 -bottom-px h-px bg-gradient-to-r from-teal-400/0 via-teal-400/40 to-teal-400/0"></span>
+                                                </a>
+                                            </li>
+                                            <li><a class="relative block px-3 py-2 transition" :class="{
+                                                    'hover:text-teal-400' : !window.location.href.includes('about'),
+                                                    'text-teal-500' : window.location.href.includes('about'),
+                                                }" href="/about">
+                                                About
+                                                <span x-show="window.location.href.includes('about')" class="absolute inset-x-1 -bottom-px h-px bg-gradient-to-r from-teal-400/0 via-teal-400/40 to-teal-400/0"></span>
+                                            </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div>
+        <div class="mx-auto max-w-2xl lg:max-w-2xl mt-12 px-4 pb-8">
+            <div id="page-content"></div>
+            <div class="prose prose-invert" id="markdown-content"><h1>Mitigating a Massive DDoS Attack: The 24 Hour Aftermath That Haunted Me</h1>
+<p>During the peak of the COVID period, SimpleMMO, experienced unprecedented success. Within just 7 days, our daily downloads skyrocketed from around 70 to a peak of around 5,000. This sudden surge in users propelled me into uncharted territory. No longer catering to a small niche, SimpleMMO was now attracting tens of thousands of daily users. As the demand surged, I found myself working tirelessly to upgrade our infrastructure to meet the needs of our growing player base. Our servers struggled to handle the influx of activity, prompting me to overhaul numerous game mechanics to optimize efficiency.</p>
+<p>Over the following month, I managed to reduce the game's overall load by approximately 70%, a significant achievement given the rapid scale-up required. For the next few weeks, operations ran smoothly.</p>
+<h2>Houston, we have a problem.</h2>
+<p>The challenge with increased game exposure is the rise in malicious actors attempting to exploit systems. I've always prioritized building robust and secure systems to the best of my ability, stemming from a haunting memory of one of my websites being hacked in 2008 when I was just 13 years old. This incident instilled a deep sense of paranoia, driving me to emphasize security in product development. </p>
+<p>Though I possess experience in mitigating common OWASP vulnerabilities such as SQL Injection, XSS Attacks, and session hijacking, encountering Distributed Denial of Service attacks (DDoS for short) is something I didn’t really experience. This knowledge gap is understandable, as my previous products had limited exposure, which diminished the incentive for malicious actors to target my systems.</p>
+<p>However, in June 2021, everything changed. I was awoken around 6 am by a message: 'The game is down.' While I had grown accustomed to encountering such issues during my system scaling efforts, this instance felt particularly unsettling. Despite employing my usual measures, I found them ineffective in resolving the problem. It wasn't long before the unsettling thought of a DDoS attack crossed my mind.</p>
+<p>I logged into CloudFlare to check the statistics. As I feared, the API endpoints were inundated with a staggering 1.2 million requests per minute. The sheer scale was unfathomable, and it became apparent that the system was ill-prepared to handle such an onslaught.</p>
+<p>Interestingly, the DDoS attack targeted only the <code>/login</code> POST endpoint. Upon closer inspection of the requests, it became evident that this wasn't an email enumeration attack; rather, the attacker repeatedly sent the same dummy email address, indicating a clear intent to disrupt my game. With this understanding, I devised a straightforward strategy: leveraging Cloudflare's DDoS protection.</p>
+<p>Cloudflare's DDoS protection proved highly effective. The attack followed a distinct pattern, allowing me to implement countermeasures by filtering out these specific requests and redirecting them to Cloudflare for handling. By configuring Cloudflare's Web Application Firewall to manage all incoming requests to the <code>/login</code> endpoint, I successfully mitigated the attack.</p>
+<p>Upon activating the firewall, there was an immediate and dramatic decrease in requests to the game. It was a seamless solution that effectively stemmed the tide. However, despite this improvement, complaints persisted about server slowness. Initially, I attributed this to the server needing time to recover after enduring such a heavy load.</p>
+<p>As I accessed the server to diagnose the sluggishness, I immediately noticed that the CPU load had been consistently hovering just below 100% since the DDoS attack. This perplexed me greatly because I had successfully mitigated the attack, yet the aftermath seemed more debilitating than the attack itself. I was utterly baffled as to the cause of this unexpected issue.</p>
+<p><img src="/img/blog/22-feb-ddos/1.png" alt="CPU Usage" title="CPU Usage"></p>
+<p>Over the next few hours, the game's performance continued to deteriorate gradually. Each passing minute seemed to exacerbate the issue, leaving me feeling helpless as I witnessed the game's functionality degrade. To rectify the situation, I employed various tactics, including database indexing techniques to optimize query efficiency and increasing server capacity by upgrading CPU and RAM. However, none of these measures yielded any improvement. It was a frustrating and bewildering experience, as every attempted solution seemed futile. In fact, the performance degraded further during the time it took me to implement these changes.</p>
+<p><img src="/img/blog/22-feb-ddos/2.png" alt="htop" title="htop"></p>
+<p>Utilizing <code>htop</code>, I gained insight into the severity of the situation. The MySQL and Apache processes were in a frenzy, with nearly every resource pushed to its limit.</p>
+<h2>Calling in the cavalry</h2>
+<p>Slowly realizing that I'm out of my depth, I made the decision to seek expertise outside my own. As, at the time, I didn't know anyone who was proficient in DevOps, I opted to post an urgent request for assistance on Upwork.</p>
+<p><img src="/img/blog/22-feb-ddos/3.png" alt="Upwork Listing" title="Upwork Listing"></p>
+<p>Within minutes of posting the urgent request, I received responses from several system administrators. I reached out to several candidates, but unfortunately, none of them appeared to possess the expertise required to address the issue. Then, I came across John (not his actual name), a skilled DevOps engineer specializing in server management. "Perfect," I thought. I briefed him on the situation, and over the next 3 or 4 hours, we collaborated closely to identify the root cause of the problem.</p>
+<h2>Figuring out the cause</h2>
+<p>Our initial course of action was to assess the health of the MySQL database, as it appeared to be the primary culprit behind the issue. Despite its high CPU usage, our examination revealed no indications of the MySQL database being at fault. Surprisingly, the write speed of the MySQL processes peaked at a mere <code>70k/s</code>, which was unexpectedly low, ruling out the possibility of heavy write processes burdening the database.</p>
+<p><img src="/img/blog/22-feb-ddos/4.png" alt="Mysql" title="Mysql"></p>
+<p>His next step was to investigate the possibility of missing indexes. Despite my growing concern that MySQL might not be the root cause of the issue and that we could be focusing on the wrong area, I decided to follow John's lead.</p>
+<p>To our surprise, John discovered a table that lacked any indexes.</p>
+<p><img src="/img/blog/22-feb-ddos/5.png" alt="Upwork Conversation" title="Upwork Conversation"></p>
+<p>I implemented the indexes, waited for about 10 minutes, and checked for any improvement. Fortunately, there was. The MySQL process had significantly decreased in CPU usage. However, oddly, this led to an increase in the load on the Apache process.</p>
+<p>As we delved deeper into the issue, it grew increasingly perplexing. Each change we made either had no discernible impact or exacerbated the problem.</p>
+<p>After roughly 6 hours of troubleshooting, we remained baffled by the root cause. We even deployed an Application Performance Manager (APM) to aid in diagnostics, but all results returned clean. The elusive issue continued to evade us.</p>
+<p>In a final attempt to resolve the issue, we decided to migrate our server from Apache's <code>mod_php</code> to <code>PHP-FPM</code> and initiated a server restart. Almost immediately, we observed significant improvements. Everything was operating swiftly once more! <code>mod_php</code> must’ve been the issue.</p>
+<p><img src="/img/blog/22-feb-ddos/6.png" alt="Bad Gateway" title="Bad gateway"></p>
+<p>However, our relief was short-lived. Roughly 15 minutes later, we began experiencing server hiccups once more, with some users encountering a <code>502 Bad Gateway</code> response. The problems were resurfacing. I promptly accessed the CPU monitor and observed the gradual climb in CPU usage, showing no signs of stopping.</p>
+<p><img src="/img/blog/22-feb-ddos/7.png" alt="CPU Usage" title="CPU Usage"></p>
+<p>We were utterly perplexed. Despite our exhaustive efforts, we remained clueless as to what was transpiring. All we knew was that the DDoS attack had triggered something, but the nature of that trigger eluded us entirely.</p>
+<p>As the night wore on, it became increasingly late for John (approximately 2 am in his local time). He had to log off, leaving me to continue the investigation solo. I dedicated the entire evening to scrutinizing every aspect with meticulous attention to detail. Yet, despite my thorough examination, nothing was wrong. Everything seemed to be well-configured and, in some instances, even performing optimally.</p>
+<p>As the clock struck 2 am, exhaustion weighed heavily upon me. I had been glued to the computer screen for nearly 18 consecutive hours, my will to live slowly dropping with each passing minute. Despite my efforts, I had exhausted every conceivable avenue:</p>
+<ul>
+<li>   Mitigated a 1.2 million reqs/minute DDoS attack by leveraging Cloudflare's protection.</li>
+<li>   Improved severe bottlenecks in the code by implementing caching mechanisms.</li>
+<li>   Implemented various indexes across the database to significantly enhance data filtering speed.</li>
+<li>   Engaged a professional system administrator to assist in diagnosing the cause, but even he was just as baffled as I was.</li>
+<li>   Upgraded the system's hardware by increasing the RAM and vCPU count.</li>
+<li>   Migrated the server from Apache's <code>mod_php</code> to <code>PHP-FPM</code> for improved performance.</li>
+<li>   Installed an application package manager in an attempt to pinpoint the root cause of the issue.</li>
+</ul>
+<p>At this point, I was starting to question if I had accidentally stumbled into a parallel universe. Nothing was making sense anymore, and each attempt to fix the issue seemed to make it worse. It was like being trapped in a world where every move I made only added to the confusion.</p>
+<h2>The cause and solution</h2>
+<p>At approximately 3am, just as I was preparing to call it a day, I felt compelled to make one final attempt at figuring out the problem's root cause. I resolved to delve deeply into the heart of the matter: the underlying process itself. This led me to use <code>strace</code> a powerful diagnostic tool for Linux to help monitor interactions between processes and the Linux kernel.</p>
+<p><code>sudo strace -p 887669</code></p>
+<p>While trawling the output, I stumbled upon a strange observation. The response repeatedly accessed numerous session files located within <code>/storage/framework/sessions</code>. What struck me as particularly unusual was not merely the access to a few files, but rather the staggering volume — hundreds of thousands of them.</p>
+<p>The realization immediately struck me. The culprit lay in the Laravel sessions, which were being processed by the garbage collection system. During the onslaught of the DDoS attack on the login endpoint, a new session was generated with each unique request. Since we were using the file driver for storing user sessions at that time, a corresponding file was created on the server to manage these sessions. Consequently, the <code>/storage/framework/sessions </code> directory was inundated with millions of these minuscule files. Due to the small size of the files, they did not significantly impact the servers storage space, thus escaping detection.</p>
+<p>In Laravel, when employing the File session driver, as there is no built-in mechanism to purge expired sessions, it resorts to a "Session Sweeping Lottery." This entails that, for every X requests to the server, the system traverses all sessions within the <code>/storage/framework/sessions</code> directory and deletes those that have expired. However, the issue arises when dealing with a high number of session files, such as a literal million (in our case).</p>
+<p>Essentially, every 1 out of 100 requests had to sift through millions of session files to verify their expiry status. With our sessions configured to expire after 24 hours, this resulted in a significant accumulation of sessions generated during the DDoS attack.</p>
+<p>I found myself genuinely amazed for a couple of reasons: firstly, the satisfaction of pinpointing the root cause of an issue that had nearly overwhelmed me; and secondly, the sheer effectiveness of the DDoS attack, which rendered the server utterly incapacitated for nearly 24 hours even after we had mitigated it.</p>
+<p>The solution to this problem was surprisingly straightforward: I temporarily reduced the session expiry time to 1 hour. While a more comprehensive fix involved migrating the session driver to Redis (which I implemented later that month), the reduction of session expiry proved remarkably effective. During the subsequent sweep, the server swiftly cleared out the session files from the DDoS attack. Once done, the server resumed its operations flawlessly. I was nearly moved to tears of relief and joy at this point.</p>
+<p>Whether the perpetrator had exploited this vulnerability knowingly remains uncertain. While I lean towards believing they hadn't, given the highly specific conditions required for such exploitation, one thing remains undeniable: they certainly achieved their goal of causing maximum chaos.</p>
+<h2>Conclusion</h2>
+<p>Despite the immense toll that day took on me, I don't regret experiencing it. In fact, the lessons from it were invaluable. Not only did I acquire proficiency in leveraging CloudFlare to mitigate DDoS attacks, but I also honed my skills in optimizing database indexes, mastering the utilization of application package managers, and deepening my understanding of Laravel's intricacies.</p>
+<script defer="" src="https://cdn.commento.io/js/commento.js"></script>
+<div id="commento"></div></div>
+        </div>
+    </div>
+
+
+
+<script src="https://cdn.usefathom.com/script.js" data-site="QJPKXCTE" defer=""></script>
+<!-- / Fathom -->
+</body><!-- Fathom - beautiful, simple website analytics --></html>
