@@ -1,3 +1,8 @@
+---
+
+title: Mitigating a Massive DDoS Attack - The 24 Hour Aftermath That Haunted Me
+---
+
 # Mitigating a Massive DDoS Attack: The 24 Hour Aftermath That Haunted Me
 
 During the peak of the COVID period, SimpleMMO, experienced unprecedented success. Within just 7 days, our daily downloads skyrocketed from around 70 to a peak of around 5,000. This sudden surge in users propelled me into uncharted territory. No longer catering to a small niche, SimpleMMO was now attracting tens of thousands of daily users. As the demand surged, I found myself working tirelessly to upgrade our infrastructure to meet the needs of our growing player base. Our servers struggled to handle the influx of activity, prompting me to overhaul numerous game mechanics to optimize efficiency.
