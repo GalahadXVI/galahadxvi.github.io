@@ -58,7 +58,7 @@ As it turns out, quite a lot could and did go wrong. Fortunately, none of the is
 
 ## The Problems with Octane
 
-One of the main challenges we faced with Octane was the relative scarcity of documentation compared to more established technologies like PHP-FPM or Apache mod_php. The internet offered limited resources on how to correctly implement and scale Octane and Swoole, which left us somewhat in the dark. As a result, OpenSwoole's documentation became my constant companion and most valuable resource over the following months.
+One challenge we faced with Octane was the relative scarcity of documentation compared to more established technologies like PHP-FPM or Apache mod_php. The internet offered limited resources on how to correctly implement and scale Octane and Swoole, which left us somewhat in the dark. As a result, OpenSwoole's documentation became my constant companion and most valuable resource over the following months.
 
 This lack of comprehensive guidance meant that we encountered numerous issues with Octane that proved to be quite troublesome to resolve. Many of these problems were either completely undocumented or required extensive research and experimentation to address. It was a period of intense learning and problem-solving, as we navigated the uncharted waters of scaling our application with these newer technologies.
 
