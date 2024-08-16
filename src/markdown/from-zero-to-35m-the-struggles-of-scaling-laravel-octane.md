@@ -253,7 +253,7 @@ return $next($request);
 
 You might have spotted a couple of issues in the code. First, it's worth noting that using the config helper to dynamically set configuration settings is generally not recommended. However, let's set that aside for now.
 
-More importantly, we didn't explicitly set the app.mode in the middleware because our default value was already set to `\App\Enums\GameMode::WEB`. This oversight could potentially lead to unexpected behavior in our application.
+More importantly, we didn't explicitly set the `app.mode` in the middleware because our default value was already set to `\App\Enums\GameMode::WEB`. This oversight could potentially lead to unexpected behavior in our application.
 
 When a worker processed a request from `app.idle-mmo.com`, it would set the configuration to `\App\Enums\GameMode::web`. However, this setting persisted across subsequent requests handled by the same worker. As a result, all following requests were processed in `APP` mode, regardless of their origin.
 
