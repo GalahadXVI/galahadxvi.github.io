@@ -237,7 +237,7 @@ One of the main challenges we faced with Octane, as previously discussed, is its
 
 Although we had already thoroughly reviewed and updated the codebase to eliminate the use of static variables and singletons, we still encountered an unexpected issue. Despite our efforts, we discovered that some data was still being shared between different requests. This situation highlighted the need for further investigation and refinement of our approach to ensure complete data isolation between requests in the Octane environment.
 
-We encountered an issue related to how we were dynamically configuring our application based on incoming requests. Our system has two modes of operation: "app" mode and "web" mode. The active mode is determined by the domain through which the user accesses the game - either app.idle-mmo.com or web.idle-mmo.com.
+We encountered an issue related to how we were dynamically configuring our application based on incoming requests. Our system has two modes of operation: "app" mode and "web" mode. The active mode is determined by the domain through which the user accesses the game - either `app.idle-mmo.com` or `web.idle-mmo.com`.
 
 This configuration allows us to customize the appearance and functionality of the game depending on whether the user is accessing the web version or the app version. We implemented this feature using middleware, which checks the domain of each request and sets the appropriate configuration accordingly.
 
