@@ -1282,6 +1282,14 @@ select {
   pointer-events: auto;
 }
 
+.static {
+  position: static;
+}
+
+.fixed {
+  position: fixed;
+}
+
 .absolute {
   position: absolute;
 }
@@ -1362,6 +1370,10 @@ select {
 
 .inline-flex {
   display: inline-flex;
+}
+
+.table {
+  display: table;
 }
 
 .h-10 {
@@ -1725,6 +1737,10 @@ select {
 .shadow-zinc-800\/5 {
   --tw-shadow-color: rgb(39 39 42 / 0.05);
   --tw-shadow: var(--tw-shadow-colored);
+}
+
+.outline {
+  outline-style: solid;
 }
 
 .ring-0 {

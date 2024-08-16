@@ -1,0 +1,276 @@
+<!DOCTYPE html><html><head>
+    <title>From Zero To 35m The Struggles Of Scaling Laravel Octane</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0">
+    <link href="/css/app.css?v=1.1" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="description" content="Software engineer and founder of Galahad Creative, a software and game development studio.">
+    <meta property="og:image" content="https://www.galahadsixteen.com/og-image.jpg">
+    <script defer="" src="/js/alpine-3.13.3.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+</head>
+
+<body class="bg-zinc-900 text-white" x-data="">
+    <header class="pointer-events-none relative z-50 flex flex-none flex-col">
+        <div class="top-0 z-10 h-16 pt-6">
+            <div class="sm:px-8 w-full">
+                <div class="mx-auto w-full max-w-7xl lg:px-8">
+                    <div class="relative px-4 sm:px-8 lg:px-12">
+                        <div class="mx-auto max-w-2xl lg:max-w-5xl">
+                            <div class="relative flex gap-4">
+                                <div class="flex flex-1 justify-center">
+                                    <nav class="pointer-events-auto block">
+                                        <ul class="flex rounded-full px-3 text-sm font-medium shadow-lg shadow-zinc-800/5 backdrop-blur bg-zinc-800/90 text-zinc-200 ring-white/10">
+                                            <li>
+                                                <a :class="{
+                                                    'hover:text-teal-400' : location.pathname != '/',
+                                                    'text-teal-500' : location.pathname == '/',
+                                                }" class="relative block px-3 py-2 transition" href="/">
+                                                    Home
+                                                    <span x-show="location.pathname == '/'" class="absolute inset-x-1 -bottom-px h-px bg-gradient-to-r from-teal-400/0 via-teal-400/40 to-teal-400/0"></span>
+                                                </a>
+                                            </li>
+                                            <li><a class="relative block px-3 py-2 transition" :class="{
+                                                        'hover:text-teal-400' : !window.location.href.includes('blog'),
+                                                        'text-teal-500' : window.location.href.includes('blog'),
+                                                    }" href="/blog">
+                                                    Blog
+                                                    <span x-show="window.location.href.includes('blog')" class="absolute inset-x-1 -bottom-px h-px bg-gradient-to-r from-teal-400/0 via-teal-400/40 to-teal-400/0"></span>
+                                                </a>
+                                            </li>
+                                            <li><a class="relative block px-3 py-2 transition" :class="{
+                                                    'hover:text-teal-400' : !window.location.href.includes('about'),
+                                                    'text-teal-500' : window.location.href.includes('about'),
+                                                }" href="/about">
+                                                About
+                                                <span x-show="window.location.href.includes('about')" class="absolute inset-x-1 -bottom-px h-px bg-gradient-to-r from-teal-400/0 via-teal-400/40 to-teal-400/0"></span>
+                                            </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div>
+        <div class="mx-auto max-w-2xl lg:max-w-2xl mt-12 px-4 pb-8">
+            <div id="page-content"></div>
+            <div class="prose prose-invert" id="markdown-content"><h1>From Zero to 35M: The struggles of scaling Laravel Octane</h1>
+<p>This blog post aims to share our experience using Laravel Octane with OpenSwoole to scale our system, enabling it to handle more tajam 35 million requests per day. I'll also discuss the challenges we encountered as a direct result of this increased traffic.</p>
+<p>Before diving into the technical details of our journey, let me provide some context about our application and its functionality. This background information will help you better understand the issues we faced and the solutions we implemented.</p>
+<h2>The Application</h2>
+<p>IdleMMO is an online multiplayer game developed using Laravel and Alpine.js. Since its public release in December 2023, it has experienced explosive growth, attracting over 160,000 users – with the majority joining in just the last two months. This rapid expansion has presented us with unprecedented scaling challenges.</p>
+<p>While I've previously written about scaling issues in my other project, SimpleMMO, the scale and intensity of IdleMMO's growth have far surpassed anything we've encountered before. This unique situation has pushed us to explore new solutions and optimize our infrastructure in ways we hadn't anticipated.</p>
+<h2>Initial Set Up</h2>
+<p>When we first launched the project, our infrastructure was relatively straightforward. We used NGINX as our web server, MySQL for our database, Redis for caching, and Laravel Horizon for managing our queues. This setup served us well for the first 3 to 4 months after the game went live. </p>
+<p>During this period, we were only gaining a few hundred new users per day, which our system could handle comfortably without overextending our resources. We considered this growth rate reasonable and manageable. </p>
+<p>However, everything changed when we released the game on the Google Play Store. We experienced a massive surge in user acquisition, jumping from a few hundred new users per day to several thousand. This dramatic increase in traffic quickly exposed the limitations of our initial setup. It became evident that our current infrastructure wouldn't be able to handle this unexpected load, prompting us to reevaluate and upgrade our system to meet the new demands.</p>
+<h2>The Problem</h2>
+<p>The core issue we faced was that our existing setup couldn't cope with the sheer volume of incoming requests. PHP-FPM, our initial choice, was struggling to manage this increased load without a substantial investment in our infrastructure, particularly in server capacity.</p>
+<p>Even with significant financial input, we realized that PHP-FPM alone wouldn't suffice to handle our new traffic levels. We began to consider more complex solutions, such as distributing our servers and implementing load balancing techniques.</p>
+<p>It became clear that we needed to explore alternative approaches to efficiently scale our system without incurring prohibitive costs or overly complicating our architecture.</p>
+<h2>The Solution</h2>
+<p>Enter Laravel Octane - marketed as a way to supercharge a Laravel application. It promised to handle more requests with fewer resources, which sounded exactly like what we needed. Intrigued by its potential, we decided to give it a try.</p>
+<p>The results were immediate and incredible. You know the saying "if it's too good to be true, it probably is"? Well, in this case, it actually was true. Our performance increased significantly, and we were suddenly able to handle a staggering amount of new users.</p>
+<p>The impact was clearly visible in our application performance metrics. According to our application package manager (Sentry.io), we saw a dramatic improvement in response times. The 95th percentile of users experienced a drop from an average of <strong>450ms</strong> to just <strong>172ms</strong>. This was a massive improvement that left me in awe.</p>
+<p>[ Insert image of Sentry.io response time ]</p>
+<h2>Why Laravel Octane worked so well</h2>
+<p>The remarkable success of Laravel Octane for our project can be attributed to its foundation on Swoole, a high-performance, coroutine-based PHP framework. This powerful combination allowed us to handle a significantly higher volume of requests while using fewer resources.</p>
+<p>Swoole's key advantage lies in its approach to application bootstrapping. Unlike PHP-FPM, which initializes the Laravel application for each incoming request, Swoole bootstraps the application once and keeps it in memory. This fundamental difference eliminates the need for repeated bootstrapping, dramatically reducing overhead and allowing Laravel Octane to process many more requests than traditional PHP-FPM setups.</p>
+<p>This efficient memory management and reduced initialization overhead are the primary reasons why Laravel Octane was able to deliver such impressive performance improvements for our application.</p>
+<p>The performance gains from this approach are indeed significant. However, this optimization comes with its own set of challenges. Since the application doesn't need to be bootstrapped for each request, we had to be particularly cautious about our use of static variables and singletons.</p>
+<p>Misusing these elements could lead to unintended data sharing between requests, which is precisely what we wanted to avoid. For instance, if Request A sets a static variable, Request B might see that same variable if it's being handled by the same worker. This scenario breaks the principle of request isolation that we aimed to maintain.</p>
+<p>Our goal was to ensure that each request is handled in complete isolation, preserving the integrity and security of our application. This required a careful review of our codebase and a thoughtful approach to state management within our application. We had to rethink how we used certain PHP features to fully leverage the benefits of Laravel Octane while avoiding potential pitfalls associated with persistent application states.</p>
+<p>We actually encountered this issue firsthand, which I'll delve into later to provide a real-world example of how it can manifest.</p>
+<p>Naively, we thought transitioning to Laravel Octane would be a breeze. After all, the Laravel documentation primarily highlighted this one issue, and we were confident that we weren't using static variables, singletons, or any other form of global state in our application. We asked ourselves, "What could possibly go wrong?"</p>
+<p>As it turns out, quite a lot could and did go wrong. Fortunately, none of the issues we faced were catastrophic, but they did present us with a series of small yet persistent headaches. These unforeseen challenges taught us that even when you think you've covered all your bases, the complexities of scaling and optimizing a large application can surprise you in unexpected ways.</p>
+<h2>The Problems with Octane</h2>
+<p>One of the main challenges we faced with Octane was the relative scarcity of documentation compared to more established technologies like PHP-FPM or Apache mod_php. The internet offered limited resources on how to correctly implement and scale Octane and Swoole, which left us somewhat in the dark. As a result, OpenSwoole's documentation became my constant companion and most valuable resource over the following months.</p>
+<p>This lack of comprehensive guidance meant that we encountered numerous issues with Octane that proved to be quite troublesome to resolve. Many of these problems were either completely undocumented or required extensive research and experimentation to address. It was a period of intense learning and problem-solving, as we navigated the uncharted waters of scaling our application with these newer technologies.</p>
+<p>Despite the challenges, this experience pushed us to dive deeper into the intricacies of Octane and Swoole, ultimately leading to a more profound understanding of our system's architecture and performance characteristics.</p>
+<h3>Database Transaction Issues</h3>
+<p>In our initial setup, we had made the decision to disable persistent database connections in our Laravel configuration. To be honest, I'm not entirely certain about the reasoning behind this choice, as it was made quite some time ago and the specifics have become a bit hazy in my memory. Regardless, this was the configuration we were working with.</p>
+<p>However, we soon discovered an interesting quirk with Laravel Octane. Despite our explicit configuration to disable persistent connections, Octane disregarded this setting. Instead, it maintained persistent database connections across requests, contradicting our specified preferences in the database configuration file.</p>
+<p>This behavior caught us off guard and highlighted an important aspect of working with Octane: it doesn't always adhere to the standard Laravel configuration options. This realization prompted us to reassess our understanding of how Octane interacts with various Laravel settings and forced us to adapt our approach to database connection management.</p>
+<p>While Octane's approach to maintaining database connections in memory aligns with its goal of supercharging application performance, we encountered an unexpected issue that wasn't documented anywhere.</p>
+<p>Upon enabling Laravel Octane, we began experiencing numerous problems with database transaction savepoints, specifically encountering "1305 SAVEPOINT does not exist" errors. Although I'm not an expert in MySQL's inner workings, my hypothesis is that these errors occurred because database connections were being persisted across requests. This meant that a savepoint created in one request could potentially interfere with another request, leading to these errors.</p>
+<p>This issue caused us significant frustration for several days, primarily because we were unaware that database connections were being persisted across requests. After all, we had explicitly disabled this feature in our configuration file.</p>
+<p>The breakthrough came unexpectedly when one of Laravel Octane's developers mentioned in passing that connections persist by default, a comment they had made in a YouTube video. This led me to investigate the Octane configuration file, where I discovered a commented-out class <code>DisconnectFromDatabases::class</code> within the <code>OperationTerminated</code> event. Simply uncommenting this line resolved our transaction issues.</p>
+<p>The lack of clear documentation on this behavior cost us valuable time in diagnosing and resolving the problem. Had this information been readily available in the Octane documentation, we could have avoided days of troubleshooting. This experience underscores the importance of comprehensive documentation, especially for newer technologies like Octane.</p>
+<h3>Worker Connections were not enough</h3>
+<p>Laravel Octane significantly improved our application's ability to handle more requests. However, this efficiency led us to an unexpected challenge: we quickly reached our maximum <code>worker_connections</code> limit.</p>
+<p>It's important to note that this wasn't a flaw in Octane itself. We likely would have encountered the same issue with PHP-FPM eventually. Octane's superior performance simply brought us to this limit faster than we anticipated.</p>
+<p>Fortunately, the solution was straightforward. We increased the <code>worker_connections</code> value in our <code>nginx.conf</code> file. While this was a simple fix, it highlighted the importance of adjusting our infrastructure to match the improved performance Octane provides.</p>
+<h3>Reaching the limit of open file descriptors</h3>
+<p>After resolving the initial issue, we encountered a new challenge: we quickly reached the limit of open file descriptors. This was due to the high number of concurrent requests that Laravel Octane allowed us to handle. As we increased the worker connections, the Nginx process was permitted to open more files simultaneously.</p>
+<p>Much like the <code>worker_connections</code> issue, it's important to note that this isn't specifically an Octane problem; we likely would have faced this issue with PHP-FPM as well.</p>
+<p>The file descriptor limit is actually a security feature implemented by the operating system. It prevents a single process, like Nginx, from opening too many files and potentially exhausting system resources.</p>
+<p>In our case, the default system limit for file descriptors was set too low at <code>1024</code>, which is insufficient for high-traffic scenarios – precisely the kind of situations that Laravel Octane is designed to handle.</p>
+<p>As a temporary solution, I increased the limit to <code>65535</code> by running the command: <code>ulimit -n 65536</code>. However, I recognized that this was not a permanent fix, as the setting would revert upon system reboot. A more long-term solution would need to be implemented to address this issue effectively.</p>
+<p>The long term solution was to increase the limit permanently. This was done by doing the following:</p>
+<p>Opening the <code>/etc/security/limits.conf</code> file add the following lines to the file:</p>
+<pre><code>* soft nofile 65536 
+* hard nofile 65536
+</code></pre>
+<p>Opening the <code>/etc/pam.d/common-session</code> file and add the following line to the file:</p>
+<pre><code>session required pam_limits.so
+</code></pre>
+<p>Opening the <code>/etc/pam.d/common-session-noninteractive</code> file and add the following line to the file:</p>
+<pre><code>session required pam_limits.so
+</code></pre>
+<p>Opening the <code>/etc/sysctl.conf</code> file and add the following line to the file:</p>
+<pre><code>fs.file-max = 2097152
+</code></pre>
+<p>Opening the <code>/etc/nginx/nginx.conf</code> file and add the following line to the file:</p>
+<pre><code>worker_rlimit_nofile 65536;
+</code></pre>
+<p>After doing this, I restarted the server and the limit was permanently increased. No more file descriptor errors.</p>
+<h3>Swoole Workers</h3>
+<p>OpenSwoole operates on a simple principle: it creates multiple workers to handle incoming user connections. When a user connects, their request is assigned to an available worker. Once the worker completes the request, it's ready to handle another.</p>
+<p>However, there's an important consideration: the number of workers is closely related to the server's vCPU count. Best practices suggest using 1 to 4 workers per vCPU. This recommendation exists because each worker can only handle one request at a time. If you have more workers than vCPUs, they may compete for resources, potentially leading to decreased performance.</p>
+<p>This concept is well-documented in the OpenSwoole documentation. For those using Laravel Octane, you can manually configure Swoole settings by modifying the octane.php file. Simply add your desired Swoole options within the following structure:</p>
+<pre><code>'swoole' =&gt; [
+    'options' =&gt; [
+        // Swoole options go here
+    ],
+],
+</code></pre>
+<p>Based on my previous experience with web systems, I decided to increase the number of workers to accommodate traffic spikes. This approach is particularly relevant for our application, which is an MMORPG and naturally experiences frequent fluctuations in user activity.</p>
+<p>Following OpenSwoole's documentation, which recommends a ratio of <strong>1</strong> to <strong>4</strong> workers per vCPU, we configured our <strong>8</strong> vCPU server to run <strong>32</strong> workers. This setup allowed us to maximize our server's capacity while staying within the recommended guidelines.</p>
+<p>By implementing these optimizations, we aimed to enhance our server's ability to handle sudden increases in traffic, ensuring a smoother experience for our players during peak usage times.</p>
+<pre><code>    'swoole' =&gt; [
+        'options' =&gt; [
+            'worker_num' =&gt; env('SWOOLE_WORKER_NUM', swoole_cpu_num()),
+        ],
+    ],
+</code></pre>
+<p>Initially, I thought I had everything under control. The environment file allowed me to easily adjust the number of workers used by the server, which seemed ideal for scaling our resources up or down as needed.</p>
+<p>However, a challenge arose: determining the right time to make these adjustments. It's not straightforward to identify when the number of connections is approaching the worker limit.</p>
+<p>The system's behavior adds to this complexity. When all workers are occupied and a new request comes in, that request is queued. While this process works, there's no simple way to monitor or gather information about these queued requests.</p>
+<p>This lack of visibility into the queuing process makes it difficult to proactively manage our server resources and ensure optimal performance.</p>
+<p>We use Sentry.io as our application monitoring tool, which provides valuable insights into incoming requests, including response times. This information helps us detect potential issues with our application.</p>
+<p>However, there's a limitation with Sentry's functionality. It only begins tracking a request once Swoole, our server software, picks up the connection and starts processing it. This means that if a request is queued before being processed, Sentry doesn't account for that waiting time.</p>
+<p>From Sentry's perspective, everything appears to be working correctly because it only sees the processing time once the request is picked up. But this doesn't reflect the user's experience accurately.</p>
+<p>The real issue is that a user might send a request and wait for a long time before receiving a response, due to queuing. Meanwhile, our monitoring tools show that everything is functioning normally because they don't capture the queuing delay.</p>
+<p>This discrepancy between the user experience and our monitoring data creates a blind spot in our ability to detect and address performance issues effectively.</p>
+<p>Finding a solution to monitor our workers' performance was quite challenging. We needed a simple method to check if our workers were reaching their capacity without resorting to installing and maintaining the Open Swoole Dashboard on our server. As a general practice, we try to minimize the use of third-party applications on our servers unless absolutely necessary.</p>
+<p>Although we eventually discovered a solution — which turned out to be remarkably straightforward — it wasn't documented anywhere. </p>
+<p>Within the Swooles documentation, we found out that we could actually get the stats of the server by using the following:<br><code>OpenSwoole\Server-&gt;stats(int $mode = \OpenSwoole\Constant::STATS_DEFAULT): string|array|false</code></p>
+<p>This function provided us with precisely the information we needed. It gave us a clear picture of our system's performance by showing the total number of connections, the number of active workers, and the number of connections waiting in the queue.</p>
+<p>With these insights, we could pinpoint exactly when our workers were reaching their maximum capacity and when connections started to pile up. This information was incredibly valuable, as it allowed us to quickly determine when we needed to increase our workforce. Overall, this function proved to be an enormous help in optimizing our system's efficiency.</p>
+<p>I encountered a challenge while working with Laravel Octane. Since we were using Octane instead of OpenSwoole directly, we didn't have access to the OpenSwoole\Server object, which was necessary for our task. This limitation was frustrating and left me searching for a solution.</p>
+<p>I eventually discovered the solution was to access it through the app() helper function. </p>
+<p><code>app()-&gt;get(\Swoole\Http\Server::class)-&gt;stats(1)</code></p>
+<p>It's really that simple. By returning this information in our response, we can now view the server's statistics in a neatly formatted JSON format. This makes the data easy to read and understand, allowing us to quickly assess the server's performance at a glance.</p>
+<p><code>return response()-&gt;json(app()-&gt;get(\Swoole\Http\Server::class)-&gt;stats(1));</code></p>
+<p>The JSON response provided exactly what I was looking for. It gave me a clear picture of the system's performance, showing me when the workers were reaching their maximum capacity and at what points connections were being queued. This information was invaluable for understanding our resource utilization and identifying potential bottlenecks.</p>
+<pre><code>connection_num	60
+abort_count	0
+accept_count	43526592
+close_count	43526570
+worker_num	8
+task_worker_num	8
+user_worker_num	0
+idle_worker_num	0
+...
+</code></pre>
+<p>Upon reviewing the response, I quickly identified the problem. The connection number was at 60, while the worker number was only 8. This imbalance meant that the workers were operating at full capacity, causing incoming connections to be queued.</p>
+<p>What caught my attention, however, was the worker number itself. I distinctly remembered setting it to 32 in the <code>octane.php</code> configuration file. So why was it showing 8?</p>
+<p>After some investigation, I discovered an important detail about the <code>octane:reload</code> command. It only refreshes the existing workers but doesn't create new ones. This realization was frustrating, as it meant I had to completely restart the server to generate the additional workers I needed.</p>
+<p>After analyzing the data from the stats function, I discovered two critical issues:</p>
+<ul>
+<li>Despite setting the worker count to <strong>32</strong> in the octane.php file, only <strong>8</strong> workers were active. I later learned that <code>octane:reload</code> doesn't create new workers.</li>
+<li>Our server was receiving more connections than the available workers could handle, resulting in a connection queue.</li>
+</ul>
+<p>To address these problems, we took two immediate actions:</p>
+<ul>
+<li>We increased our server's vCPU count from <strong>16</strong> to <strong>32</strong>, allowing us to safely raise the number of workers to <strong>128</strong> without any adverse effects.</li>
+<li>By restarting the Laravel Octane server, we successfully created the new workers, significantly improving our ability to handle incoming connections.</li>
+</ul>
+<h3>Sharing data between instances</h3>
+<p>One of the main challenges we faced with Octane, as previously discussed, is its tendency to keep the application in memory. This characteristic can lead to unintended data sharing between requests if not properly managed.</p>
+<p>Although we had already thoroughly reviewed and updated the codebase to eliminate the use of static variables and singletons, we still encountered an unexpected issue. Despite our efforts, we discovered that some data was still being shared between different requests. This situation highlighted the need for further investigation and refinement of our approach to ensure complete data isolation between requests in the Octane environment.</p>
+<p>We encountered an issue related to how we were dynamically configuring our application based on incoming requests. Our system has two modes of operation: "app" mode and "web" mode. The active mode is determined by the domain through which the user accesses the game - either app.idle-mmo.com or web.idle-mmo.com.</p>
+<p>This configuration allows us to customize the appearance and functionality of the game depending on whether the user is accessing the web version or the app version. We implemented this feature using middleware, which checks the domain of each request and sets the appropriate configuration accordingly.</p>
+<p>The approach we used in our middleware allowed us to dynamically adjust the game's interface and behavior based on the access point, providing a tailored experience for both web and app users.</p>
+<pre><code>if($request-&gt;getHost() === 'app.idle-mmo.com') {
+    config(['game.mode' =&gt; \App\Enums\GameMode::APP]);
+}
+
+return $next($request);
+</code></pre>
+<p>You might have spotted a couple of issues in the code. First, it's worth noting that using the config helper to dynamically set configuration settings is generally not recommended. However, let's set that aside for now.</p>
+<p>More importantly, we didn't explicitly set the app.mode in the middleware because our default value was already set to <code>\App\Enums\GameMode::WEB</code>. This oversight could potentially lead to unexpected behavior in our application.</p>
+<p>When a worker processed a request from <code>app.idle-mmo.com</code>, it would set the configuration to <code>\App\Enums\GameMode::web</code>. However, this setting persisted across subsequent requests handled by the same worker. As a result, all following requests were processed in <code>APP</code> mode, regardless of their origin.</p>
+<p>The problem was that there was no mechanism to revert the configuration back to the default <code>WEB</code> mode. The only way to reset it was to terminate the worker and start a new one. This issue arose because the configuration setting was being maintained across multiple requests, instead of being reset after each one.</p>
+<p>I solved this by binding the application mode to the request itself thus avoiding the issue entirely because the request is not persisted across requests.</p>
+<pre><code>$request-&gt;attributes-&gt;set('app_mode', AppMode::APP);
+</code></pre>
+<p>This incident, although a minor oversight with fortunately minimal consequences, serves as an excellent illustration of the potential risks associated with improper data handling between requests. It also highlights how even experienced developers can easily make mistakes when working with Octane. This situation underscores the importance of careful coding practices and thorough testing, especially when dealing with data persistence and request handling in web applications.</p>
+<h3>Race condition on a heavy operation</h3>
+<p>The most severe problem we faced turned out to be a critical issue that once caused our server to crash for several hours. What made it particularly challenging was the difficulty in identifying its root cause.</p>
+<p>At the heart of the problem was an extremely resource-intensive operation within our application. Unknown to us at the time, this operation was vulnerable to race conditions. These concurrent execution conflicts were silently undermining our system's stability and performance.</p>
+<p>This problem had actually been in the code since the beginning, it's only because of the massively increased traffic that it became an issue.</p>
+<p>Basically, there was a way for us to access the number of players that were currently active in the game by calling a function such as <code>activePlayers()</code>. This function contained an operation that calculated the number of active players in the game using a query.</p>
+<p>To optimize performance, we implemented a caching system for this function. The result of the query would be stored in cache for 5 minutes before being recalculated. This approach was suitable because the number of active players doesn't fluctuate rapidly. As a result, the heavy calculation would only need to be performed once every 5 minutes, significantly reducing the load on our system while still providing reasonably up-to-date information.</p>
+<p>A problem emerged when the cache expired and multiple requests flooded in simultaneously. The Octane server's impressive ability to handle a large volume of requests actually made the code more vulnerable to race conditions.</p>
+<p>This situation led to multiple requests attempting to calculate the number of active players in the game at the same time. We had increased the number of workers to <strong>128</strong>, which meant that potentially <strong>128</strong> separate requests could be trying to perform this calculation simultaneously. This issue became immediately apparent as soon as we implemented the increased worker count.</p>
+<p>In essence, this resource-intensive operation was being executed nearly 100 times simultaneously. As a result, the server was struggling to keep up with the demand, often becoming overwhelmed and occasionally crashing altogether.</p>
+<p>We implemented a straightforward fix to address the issue. By adding a lock to the operation that calculates the number of active players, we ensured that only one query could be executed at a time. When the calculation is in progress, any additional requests for this information receive a default value of zero. This temporary measure remains in place until the lock is released, allowing the next query to proceed. This solution effectively prevents concurrent calculations and maintains system stability.</p>
+<p>It went from this:</p>
+<pre><code>Cache::get('active_players', function() {
+    return $this-&gt;getActivePlayers();
+});
+
+function getActivePlayers(): int
+{
+    // Heavy operation. The below query is an extremely simplified version of the actual query.
+    return User::where('last_active', '&gt;', now()-&gt;subMinutes(5))-&gt;count();
+}
+</code></pre>
+<p>To this:</p>
+<pre><code>return Cache::lock('active_players')-&gt;get(function() {
+    return $this-&gt;getActivePlayers();
+});
+function getActivePlayers(): int
+{
+    return Cache::lock('active_players_query_lock')-&gt;get(function() {
+        // Heavy operation. The below query is an extremely simplified version of the actual query.
+        return User::where('last_active', '&gt;', now()-&gt;subMinutes(5))-&gt;count();
+    }) ?? 0;
+}
+</code></pre>
+<p>This solved our problem entirely. No more server hiccups.</p>
+<h2>Conclusion</h2>
+<p>Laravel Octane has proven to be an exceptional solution for scaling our Laravel application. Its implementation has yielded impressive results, enabling us to manage an astonishing volume of requests using significantly fewer resources compared to PHP-FPM. This efficiency has not only led to substantial savings in server costs but has also dramatically increased our user capacity. In essence, Laravel Octane has empowered our application to perform beyond our initial expectations, making it an invaluable tool for our scaling needs.</p>
+<p>Despite our efforts, the limited online resources has made it challenging to implement the system smoothly. Although we haven't faced any significant problems, we've encountered several minor issues that have been time-consuming to resolve. These small hurdles have slowed our progress and required extra attention to detail.</p>
+<p>Should these solutions have been in the documentation? That is not for me to decide. I'm just a simple moron outlining some of the issues I've faced with Laravel Octane simply because I didn't really see all that much online.<br>After all, the pains of having to find out these issues yourself makes things much more interesting.</p>
+<p>I must say, if some of these solutions had been included in the documentation, it would have saved me a considerable amount of time. This is especially true for the information about Octane's default configuration is to persist database connections across multiple requests. Having this knowledge upfront would have been incredibly helpful.</p>
+<p>Ultimately, I recommend Laravel Octane to anyone who is looking to scale their Laravel application. It is a fantastic tool that has allowed us to handle a staggering amount of requests with a lot less resources than we would have needed with the traditional way such as PHP-FPM or Apache mod-php.</p>
+<p>If I were to boil it down to a few key points, it would be the following:</p>
+<ul>
+<li>Be <em>extremely</em> careful about sharing data between requests. It is very easy to do and can cause a lot of issues - especially if the data is sensitive.</li>
+<li>Enabling octane literally supercharges your application that it ends up reaching a lot of the pre-set limits of the server. Be prepared to increase the limits of the server.</li>
+<li>Making a hard restart of the octane server is needed <em>every</em> time you change the number of workers in the <code>octane.php</code> file. <code>octane:reload</code> only reloads the existing workers.</li>
+<li><code>app()-&gt;get(\Swoole\Http\Server::class)-&gt;stats(1);</code> is your best friend. Use it to see the stats of the server and when the workers are being maxed out.</li>
+<li>Be mindful of any extremely heavy operations/queries that are susceptible to race conditions - especially when the server is supercharged to handle a lot more requests.</li>
+</ul>
+</div>
+        </div>
+    </div>
+
+
+
+<script src="https://cdn.usefathom.com/script.js" data-site="QJPKXCTE" defer=""></script>
+<!-- / Fathom -->
+</body><!-- Fathom - beautiful, simple website analytics --></html>

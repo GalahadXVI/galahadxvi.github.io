@@ -4,6 +4,8 @@ const path = require('path'); // Path module for handling file paths
 const jsdom = require('jsdom'); // jsdom module for DOM manipulation
 const { JSDOM } = jsdom; // Destructuring JSDOM for ease of use
 const marked = require('marked').marked; // Importing marked library for Markdown to HTML conversion
+const scriptDir = path.resolve(__dirname); // Get the directory of the current script
+const rootDir = path.resolve(scriptDir, '..'); // Get the root directory by going up one level
 
 /**
  * Extracts front matter from the content and removes it from the content.
@@ -41,7 +43,7 @@ function formatTitle(fileName) {
  * @returns {string} The converted HTML content
  */
 function convertMarkdownToHtml(content, title) {
-    const templateHtml = fs.readFileSync('templates/main.html', 'utf8');
+    const templateHtml = fs.readFileSync(path.join(scriptDir, '/templates/main.html'), 'utf8');
     const dom = new JSDOM(templateHtml);
     const document = dom.window.document;
 
@@ -58,8 +60,8 @@ function convertMarkdownToHtml(content, title) {
 }
 
 // Define directories for Markdown files and output HTML files
-const markdownDirectory = 'markdown';
-const outputDirectory = '../public/blog';
+const markdownDirectory = path.join(scriptDir, '/markdown');
+const outputDirectory = path.join(rootDir, '/public/blog');
 
 // Read and process each Markdown file in the directory
 fs.readdirSync(markdownDirectory).forEach(file => {
@@ -69,7 +71,7 @@ fs.readdirSync(markdownDirectory).forEach(file => {
 
         let { frontMatter, content } = extractFrontMatter(markdownContent);
         const title = frontMatter.title || formatTitle(path.basename(file, '.md'));
-        
+
         const htmlContent = convertMarkdownToHtml(content, title);
 
         const outputFileName = path.basename(file, '.md') + '.html';

@@ -7,6 +7,8 @@ const execSync = require('child_process').execSync; // For executing shell comma
 const hljs = require('highlight.js/lib/core');
 hljs.registerLanguage('javascript', require('highlight.js/lib/languages/javascript'));
 hljs.registerLanguage('php', require('highlight.js/lib/languages/php'));
+const scriptDir = path.resolve(__dirname); // Get the directory of the current script
+const rootDir = path.resolve(scriptDir, '..'); // Get the root directory by going up one level
 
 /**
  * Extracts front matter from the content and removes it from the content.
@@ -61,14 +63,34 @@ function processHtmlFile(filePath, template) {
     return dom.serialize();
 }
 
+// Clear the given directory
+function clearDirectory(directory, filetype = null) {
+    if (fs.existsSync(directory)) {
+        fs.readdirSync(directory).forEach(file => {
+            const filePath = path.join(directory, file);
+            if (fs.lstatSync(filePath).isDirectory()) {
+                clearDirectory(filePath, filetype); // Recursively clear subdirectories
+            } else {
+                // If filetype is set, only delete files with the specified extension
+                if (!filetype || path.extname(file) === filetype) {
+                    fs.unlinkSync(filePath); // Remove the file
+                }
+            }
+        });
+    }
+}
 /**
  * Main function to execute the build process.
  */
 function build() {
+    // Clear the existing folders
+    clearDirectory(path.join(rootDir, 'public/blog'), '.html');
+    clearDirectory(path.join(rootDir, 'public'), '.html');
+
     // Read the HTML template file
-    const templateHtml = fs.readFileSync('templates/main.html', 'utf8');
-    const pagesDirectory = 'pages';
-    const publicDirectory = '../public';
+    const templateHtml = fs.readFileSync(path.join(scriptDir, '/templates/main.html'), 'utf8');
+    const pagesDirectory = path.join(scriptDir, '/pages');
+    const publicDirectory = path.join(rootDir, '/public');
 
     // Process each HTML file in the pages directory
     fs.readdirSync(pagesDirectory).forEach(file => {
@@ -83,7 +105,7 @@ function build() {
     });
 
     // Run the markdown render script
-    execSync('node render-markdown.js', { stdio: 'inherit' });
+    execSync('node ' + path.join(scriptDir, 'render-markdown.js'), { stdio: 'inherit' });
 }
 
 // Execute the build process
