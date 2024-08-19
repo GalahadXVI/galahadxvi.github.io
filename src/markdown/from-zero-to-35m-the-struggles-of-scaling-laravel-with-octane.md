@@ -281,7 +281,7 @@ To improve performance, we decided to cache the result of this query for 5 minut
 
 The problem came up when the cache expired and a bunch of requests hit the server at the same time. Octane’s strength in handling a high volume of requests actually made our code more prone to race conditions in this situation.
 
-This situation caused multiple requests to try calculating the number of active players in the game at the same time. Ironically, increasing the number of workers made things even worse. With 68 workers, we had up to 68 separate requests potentially trying to perform this calculation all at once. While the chances of all 68 workers hitting the same endpoint at the same time were slim, even just 10 or 20 simultaneous requests were enough to bog down the workers and cause the rest of the connections to queue up - especially because this also caused a bottleneck on our MySQL server.
+This situation caused multiple requests to try calculating the number of active players in the game at the same time. Ironically, increasing the number of workers made things even worse. With 64 workers, we had up to 64 separate requests potentially trying to perform this calculation all at once. While the chances of all 64 workers hitting the same endpoint at the same time were slim, even just 10 or 20 simultaneous requests were enough to bog down the workers and cause the rest of the connections to queue up - especially because this also caused a bottleneck on our MySQL server.
 
 Basically, this heavy operation was being run multiple times at the exact same moment. The server struggled to keep up with the load, often getting overwhelmed and occasionally crashing completely.
 
