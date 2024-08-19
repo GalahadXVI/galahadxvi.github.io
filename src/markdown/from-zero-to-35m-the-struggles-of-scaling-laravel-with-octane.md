@@ -253,11 +253,11 @@ return $next($request);
 
 You might have noticed a couple of potential issues in the code. For starters, it's generally not a good idea to use the config helper to dynamically set configuration settings in situations like this. But let’s put that aside for now.
 
-More importantly, we ran into an issue because we didn’t explicitly set the game mode to `WEB` in the middleware. We thought this was fine because the default was already set to `\App\Enums\GameMode::WEB`, but that turned out to be a problem. I overlooked the fact that the setting would persist across requests.
+More importantly, we ran into an issue because we didn’t explicitly set the game mode to `GameMode::WEB` in the middleware. We thought this was fine because the default was already set to `GameMode::WEB`, but that turned out to be a problem. I overlooked the fact that the setting would persist across requests.
 
-When a worker processed a request from `app.idle-mmo.com`, it would set the configuration to `\App\Enums\GameMode::APP`. However, this setting persisted across subsequent requests handled by the same worker. As a result, all following requests were processed in `APP` mode, regardless of their origin.
+When a worker processed a request from `app.idle-mmo.com`, it would set the configuration to `GameMode::APP`. However, this setting persisted across subsequent requests handled by the same worker. As a result, all following requests were processed in `GameMode::APP` mode, regardless of their origin.
 
-The core of the problem was that there was no way to revert the configuration back to the default `WEB` mode after handling a request. The only way for it to reset was to wait for the worker process to restart - which only happened once the worker had reached the end of its lifecycle. In our case, because we didn't explicitly set a value to `max_requests`, the worker wouldn't restart. Instead, it would keep processing requests indefinitely (or up until the point we run `octane:reload` during our deployment process).
+The core of the problem was that there was no way to revert the configuration back to the default `GameMode::WEB` mode after handling a request. The only way for it to reset was to wait for the worker process to restart - which only happened once the worker had reached the end of its lifecycle. In our case, because we didn't explicitly set a value to `max_requests`, the worker wouldn't restart. Instead, it would keep processing requests indefinitely (or up until the point we run `octane:reload` during our deployment process).
 
 I fixed the issue by binding the game mode directly to the request itself, which completely avoided the problem since the request object is unique to each request.
 
