@@ -315,7 +315,7 @@ function getActivePlayers(): int
 }
 ```
 
-This solution completely fixed our problem — no more server hiccups. The only downside is that a a very small number of users might see "0" as their active player count for a short period, but that’s a small trade-off for the stability and performance we’ve gained. We’re planning to implement a more robust solution soon by placing the calculation in a queue and processing it asynchronously. This way, the system can handle the heavy operation without impacting the user experience.
+This solution completely fixed our problem — no more server hiccups. The only downside is that a a very small number of users might see "0" as their active player count for a short period, but that’s a small trade-off for the stability and performance we’ve gained. We’re planning on implementing a more robust solution soon by placing the calculation in a queue and processing it asynchronously. This way, the system can handle the heavy operation without impacting the user experience.
 
 ## Conclusion
 
