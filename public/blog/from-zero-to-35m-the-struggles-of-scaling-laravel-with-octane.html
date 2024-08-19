@@ -273,7 +273,7 @@ function getActivePlayers(): int
 <li>Be <em>extremely</em> careful about sharing data between requests. It is very easy to do and can cause a lot of issues - especially if the data is sensitive.</li>
 <li>Enabling octane literally supercharges your application that it ends up reaching a lot of the pre-set limits of the server. Be prepared to increase those limits.</li>
 <li>Making a hard restart of the Octane server is needed every time you change the number of workers in the <code>octane.php</code> file. <code>octane:reload</code> only reloads the existing workers.</li>
-<li><code>app()-&gt;get(\Swoole\Http\Server::class)-&gt;stats(1);</code> is your best friend. Use it to see the stats of the server and when the workers are being maxed out.</li>
+<li><code>app()-&gt;get(\Swoole\Http\Server::class)-&gt;stats(1);</code> is a really nice and easy way to monitor Swoole's workers. Use it to see the stats of the server and when the workers are being maxed out.</li>
 <li>Be extremely mindful of any extremely heavy operations/queries that are susceptible to race conditions - especially when the server is supercharged to handle a lot more requests. Preferably, move these operations to a queue so they don't impact the user experience at all.</li>
 </ul>
 </div>

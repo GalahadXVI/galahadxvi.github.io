@@ -333,5 +333,5 @@ If I were to boil it down to a few key points, it would be the following:
 - Be _extremely_ careful about sharing data between requests. It is very easy to do and can cause a lot of issues - especially if the data is sensitive.
 - Enabling octane literally supercharges your application that it ends up reaching a lot of the pre-set limits of the server. Be prepared to increase those limits.
 - Making a hard restart of the Octane server is needed every time you change the number of workers in the `octane.php` file. `octane:reload` only reloads the existing workers.
-- `app()->get(\Swoole\Http\Server::class)->stats(1);` is your best friend. Use it to see the stats of the server and when the workers are being maxed out.
+- `app()->get(\Swoole\Http\Server::class)->stats(1);` is a really nice and easy way to monitor Swoole's workers. Use it to see the stats of the server and when the workers are being maxed out.
 - Be extremely mindful of any extremely heavy operations/queries that are susceptible to race conditions - especially when the server is supercharged to handle a lot more requests. Preferably, move these operations to a queue so they don't impact the user experience at all.
