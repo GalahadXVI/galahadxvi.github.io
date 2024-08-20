@@ -50,6 +50,12 @@ function convertMarkdownToHtml(content, title) {
     const titleElement = document.querySelector('title');
     titleElement.textContent = title;
 
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    ogTitle.setAttribute('content', title);
+
+    const twitterTitle = document.querySelector('meta[property="twitter:title"]');
+    twitterTitle.setAttribute('content', title);
+
     const htmlContent = marked(content);
 
     const markdownElement = document.getElementById('markdown-content');

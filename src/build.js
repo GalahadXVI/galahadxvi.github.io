@@ -53,6 +53,13 @@ function processHtmlFile(filePath, template) {
     if (frontMatter.title) {
         const titleElement = document.querySelector('title');
         titleElement.textContent = frontMatter.title;
+        
+        // Update og:title and twitter:title meta
+        const ogTitle = document.querySelector('meta[property="og:title"]');
+        ogTitle.setAttribute('content', frontMatter.title);
+        
+        const twitterTitle = document.querySelector('meta[property="twitter:title"]');
+        twitterTitle.setAttribute('content', frontMatter.title);
     }
 
     // Insert the content into the template's designated area
