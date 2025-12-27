@@ -1,0 +1,185 @@
+---
+
+title: AI, Laravel, and the Gap Between Code and Architecture
+---
+
+# AI, Laravel, and the Gap Between Code and Architecture
+
+AI has moved at an insane pace over the last few years. I love it about it as much as the next guy, probably more so. At the same time, it’s hard to ignore how both fascinating and unsettling it is to watch this technology advance so quickly and weave itself into everyday life. From a software development perspective, the progress we’ve seen in AI agents over such a short period is genuinely staggering. I’m not sure we’ve ever witnessed this level of rapid advancement reach the average person in quite the same way before.
+
+I only really started using AI agents around April this year, and my usage has steadily increased since then. A big part of that is the constant arms race between the major companies, each trying to outdo the others with their models. You can clearly see how much effort is being poured into coding-focused models in particular. I often see people nitpicking what these agents can’t do, pointing out very specific edge cases or shortcomings, yet the fact that this is even a discussion feels almost unbelievable compared to where things were a year ago. ChatGPT has been around for a while, but being able to tell a machine “go and make me a website” and have it produce something of genuinely reasonable quality is nothing short of astonishing.
+
+With all of that said, and despite the praise AI agents rightly get, I want to focus on one very specific weakness I’ve run into when using them for software development. It’s an area where I haven’t really seen much meaningful improvement lately, even with how impressive each new release has been. That weakness is the model’s ability to properly think ahead and structure a codebase with real longevity in mind. Let me explain.
+
+AI models are getting exceptionally good at coding. It’s hard to argue otherwise, even if some people still do, and I’m sure they have their reasons. From a more objective standpoint though, the improvement is clear. Whether or not the goalposts have shifted over time isn’t really the point. You can give a model a task and, with the current frontier models, you’ll usually get an output that’s genuinely usable.
+
+Before continuing, I want to make it clear that this is written purely from my own experience. I follow the development of AI closely, both as a spectator and as a software developer, and most of what I know comes from what I have read, watched, and experimented with along the way. I do not work as an AI engineer, and I am not presenting this as expert analysis. That said, the patterns and issues I am about to discuss closely reflect what I have observed in real-world use, which felt worth sharing.
+
+## The Problem 
+
+The issue with these coding models is that, while they continue to raise the bar in terms of raw programming ability, they still struggle when it comes to designing components and architectures that lead to systems which are genuinely robust and secure over time. Put more simply, they’re excellent builders. Where they fall is in the architectural thinking that sits behind a well designed codebase. I’ll expand on what I mean by that.
+
+Back when I was fresh out of uni, I built my first real project, SimpleMMO. It was a very simple text-based MMORPG written in PHP and Laravel, and it ended up being both my introduction to the real world and my first proper experience with Laravel. Funnily enough, SimpleMMO was quite literally my “hello world” application, it just spiraled far beyond what a hello world ever should. I’m not sure many people are foolish enough to publicly release their first learning project, yet here we are.
+
+The codebase was, and still is, pretty shocking. Genuinely bad in places. At the time, I was approaching development in a very narrow way, largely because I lacked the experience, guidance, and broader understanding needed to do things properly. I was focused on making things work, with very little awareness of structure, longevity, or the kinds of decisions that come back to haunt you years later.
+
+When I built features in the game back then, the process was very straightforward. I’d outline the idea, “right, I’m going to build X”, and then I’d just get on with it. I’d build the feature and move on. That was pretty much the entire thought process. Very little consideration went into anything beyond making it work, at least from a code architecture point of view. I’m not talking about feature design here, just how the code itself was structured.
+
+If X needed a function called `a()`, I’d write `a()` purely for that one use case. Nothing else would ever touch it. It existed solely to make X work. And to be fair, it did work. It worked well. Arguably, it worked a little too well.
+
+That approach worked fine for the first feature. Then the second feature came along, and I added `b()`. Then `c()`, then `d()`. Before I knew it, I had a growing collection of single use functions, each tightly coupled to the specific feature they were written for. As the codebase grew, the problem only got worse.
+
+It wasn’t something I’d anticipated when I first started the game, but in hindsight that’s hardly surprising. At the time, I had no real sense of what the application would eventually turn into, or how many years it would be alive for. I was solving problems in isolation, without any mental model of how those decisions would compound as the system expanded.
+
+Coding with AI, at least in my experience, feels very similar to that. Almost uncomfortably so. I suspect a lot of people have had the same realisation, especially those with a bit more experience under their belt. I’m not suggesting AI is at the same level I was back then. In fact, it has almost certainly surpassed my younger self already. What I’m talking about is the conceptual side of things, specifically the ability to think ahead.
+
+For all its intelligence, AI still struggles to make architectural decisions that set a system up to be robust and genuinely extensible over time. It can produce impressive solutions in isolation, but without that forward looking structure, those solutions can quickly pile up into something that resembles a spaghetti codebase.
+
+Let me walk through a straight forward example to better illustrate what I mean, drawing directly from my own experience. Right now, we run two games. There’s SimpleMMO, which I’ve already touched on, a legacy codebase built around a lot of single use ideas. Then there’s IdleMMO, which was created specifically to address many of those earlier mistakes. Between the two, there’s a very clear example of the kind of architectural problems I see AI falling into, problems I once created myself.
+
+To anyone looking in from the outside, SimpleMMO and IdleMMO are extremely similar products. They’re both mobile text-based RPGs, just with slightly different play styles. One is idle, meaning much of the gameplay runs automatically, while the other is more traditional and requires active input. Under the hood though, the core concepts are effectively the same. You have a character, that character can take part in battles, and they gain experience and level up. On the surface, it’s all fairly straightforward.
+
+In both games we’ve got a “potion” mechanic. You consume a potion and it gives you a temporary boost, for example +50% experience for the next 30 minutes.
+
+In SimpleMMO, with the narrow approach I mentioned earlier, it started off very directly. When a battle finishes, we calculate the base experience from the enemy, then we apply any modifiers, in this case the potion. Job done. It’s simple, and it works.
+
+Then a few weeks later we introduce another source of bonus XP, say a magical item that grants +20% experience while it’s equipped. So we just add another condition into the same battle calculation. You end up with something along these lines when you finalise the battle:
+
+```
+$base_experience = 100;
+$potion_modifier = 0.5; // 50%
+$magical_item_modifier = 0.2; // 20%
+
+$potion_bonus = $has_taken_potion ? $base_experience * $potion_modifier : 0;
+$magical_item_bonus = $has_magical_item ? $base_experience * $magical_item_modifier : 0;
+
+$final_experience = $base_experience + $potion_bonus + $magical_item_bonus;
+```
+
+Still fine. Still readable. Still does the job.
+
+But then the pattern kicks in. A few more weeks go by and we add a game wide event that boosts the experience even more, so we bolt that on too. Later we add a levelling perk. Then a party bonus. Then a bonus tied to some specific action. Then another one. And another. Pretty quickly, the “finalise battle” experience calculation turns into a dumping ground for every new modifier the game ever introduces, and the code starts getting stupidly long.
+
+A few months pass and then we throw in the real complication. Up until this point, those bonuses only applied to battles, but what happens when we want the same bonuses to affect other actions too? So we replicate the logic elsewhere, like when a player gains experience from exploring the world. Great, it works, everything still behaves as expected.
+
+Then we add quests, and quest completion needs to respect the same modifiers, so we do it again. Then another feature comes along that awards experience, so we do it again. And then another. You can see where this goes. The “bonus XP logic” stops being a battle concern and turns into a cross cutting rule that we keep re-implementing, feature by feature, until it’s scattered all over the codebase.
+
+So we end up with a bunch of distinct features that all rely on essentially the same logic, except they each carry their own isolated copy of it. They look similar, they behave similarly, but they’re not actually connected in any meaningful way.
+
+Then, let’s say, down the line, we hit a real world problem. Someone finds an exploit where they’re getting a larger bonus than they should. So we start tracing through every place experience is calculated and patching the bug. Except now we must fix it in every single implementation. We inevitably miss one or two, and suddenly the behavior depends on where the XP came from, because different parts of the codebase are applying “the same” logic in slightly different ways.
+
+After two or three years of this, maintainability becomes a complete nightmare. The frustrating part is that in the early days, even the early years, it all felt totally fine. Nothing was obviously on fire, and it was hard to justify spending time refactoring something that appeared to be working. But it behaves like a line of dominoes. Once one area starts to wobble, everything connected to it starts collapsing right behind it.
+
+## Centralisation
+
+To most experienced developers, the answer here is probably painfully obvious: centralisation. We can approach this in two ways. First, we introduce a single service responsible for handling all character bonuses. We pass in a base value, ask the service to apply every relevant modifier, and it returns the final result. Alongside that, we maintain a CharacterBonus model and table that acts as the central source for defining and storing all bonus related data tied to a character.
+
+Together, these address two of the biggest problems around robustness and maintainability. By funnelling all bonus logic through a single service and backing it with a well defined data model, we establish a clear singular source of truth. Any change to how bonuses are calculated or structured happens in one place and immediately affects the entire system. That drastically reduces the risk of subtle bugs creeping in due to missed implementations and makes future changes far safer to reason about.
+
+Secondly, it removes the need to tie checks into every individual area of the game. With the old approach, we’d be manually checking conditions all over the place. Is the character holding a magical item? Are they in a group? Is there an active event? Each new bonus meant adding more conditional logic wherever experience was calculated. As the codebase grows, that quickly turns into a mess because more and more systems need to be aware of more and more rules.
+
+With a centralised `CharacterBonus` model, that responsibility shifts to the edges of the system instead. When a character equips or unequips a magical item, we create or remove a corresponding CharacterBonus record. When they join or leave a group, we do the same. The rest of the game no longer needs to care why a bonus exists, only that it does. Experience calculations simply consume the data that already represents the character’s current state.
+
+That allows the calculation code to become stupidly simple:
+
+```
+// \App\Services\Character\BonusService
+calculate(Character $character, int $base_experience): int
+{
+    $collective_bonus = $character->bonuses()->sum('value');
+
+    return $base_experience * $collective_bonus;
+}
+
+// Calculating experience for a battle
+$experience = $this->character_bonus->calculate($character, $base_experience);
+```
+
+
+The code becomes cleaner, easier to refactor, and far more robust by default. This is exactly how we handle it in our newer game, IdleMMO, and the difference is night and day. Adding new bonus sources stops being a risky refactor and becomes a straightforward data change, which makes long term maintenance dramatically easier.
+
+This is just one very straightforward example, and there are far more complex areas in real world applications where the same principle applies. Many features benefit from having a single source of truth, especially when multiple systems intersect and build on top of each other, which only increases overall complexity. The point here isn’t that this is a particularly advanced pattern, but that it clearly highlights the exact kind of thinking AI still seems to struggle with when it comes to software development.
+
+## AI's Involvement
+
+The core issue I’ve found with AI is that it still tends to think in a very single minded way and it’s not something I’ve really seen improve in any profound sense, especially when you compare it to the raw leaps in capability and intelligence we’ve seen over the past year. After sitting with it for a while, it starts to make a lot of sense why that is.
+
+While this is seemingly, on the surface, a fairly simple solution, in practical terms, it’s not really. A lot of the times, its only something  you really encounter or even consider to be a problem when you have both the experience of working with such legacy systems and single-minded ways of working, and are also in the opportunity to look drastically ahead and to be able to make significant architectural design decisions that will prevent these issues from happening in the first place. 
+
+Most AI agents optimise around closing the current “ticket”. They focus on satisfying the immediate requirement in front of them, rather than protecting the codebase from what it might look like five or ten iterations down the line. Even when a model can reason abstractly about architecture, the default behaviour is still to produce the smallest possible change that meets the prompt. That happens because it has limited visibility into the future roadmap and often an incomplete understanding of the system’s true boundaries. Given those constraints, the locally optimal move is to add another conditional, duplicate a modifier, or patch the battle reward logic in place. Over time, those locally sensible decisions accumulate into exactly the kind of scattered, fragile architecture we’ve been talking about.
+
+So why does an AI struggle to propose that kind of solution up front? Largely because it usually cannot see enough of the system to justify introducing a cross cutting mechanism, and because it is implicitly trying to minimise risk. Centralising effects is a platform level decision. In or case, it touches persistence, caching, invalidation, calculations, UI display, audit trails, and possibly even anti cheat systems. If a model is only shown the battle reward function, the rational move is to keep the change local and self contained.
+
+As an experienced developer, we tend to make the “big picture” move because we carry broader product context with us. We anticipate how features tend to grow, and we’ve often already felt the pain of maintaining systems that did not make these decisions early enough. An AI model is capable of similar reasoning, but it needs the same inputs to get there. That means a clear expectation of future growth, explicit architectural principles, and an explicit signal that it is allowed to introduce a new subsystem rather than patching the existing one.
+
+The way we’ve found to get AI to behave more consistently is to encode those architectural principles as hard constraints, both in the request itself and, ideally, in the codebase. If we explicitly state things like “all modifiers must be represented as effects and resolved via `CharacterEffect` or an `EffectResolver`, battle code must not query potions directly, and any new bonus source must be implemented by adding a new effect”, then the model has a clear set of rules to work within rather than a vague goal to satisfy.
+
+Pair that with a lightweight architecture map of the existing system, outlining which services own combat, inventory, buffs, and user state, and the behaviour shifts noticeably. The model stops guessing how things might fit together and starts designing within the boundaries it’s been given. Without that context, it will almost always gravitate towards patching the nearest function, because from its perspective, that’s the safest and least risky interpretation of the request.
+
+## Reliance on the prompter
+
+The problem with that approach is that it pushes the responsibility for robustness back onto the prompter, and by extension, their ability to design the system properly. If we have to pre-bake architectural rules into the prompt to get good architecture out, then we’re still relying on the human to be the architect, which is the exact gap we’re trying to close in the first place.
+
+Right now, AI systems tend to optimise for task completion, not system stewardship. When we say “make an RPG game in Laravel,” the model likely reads that as “produce something that satisfies the minimum implied requirements, while making the fewest risky assumptions.” Under that interpretation, an MVP with localised logic is the rational outcome. There’s no real incentive to invest in abstraction, centralisation, or long term resilience because those decisions only pay off if the system is expected to grow, and growth is not guaranteed by the prompt alone.
+
+Humans usually assume evolution by default. We’ve seen how software expands, how requirements creep, and how today’s quick patch becomes tomorrow’s maintenance burden. The model doesn’t carry that implicit assumption unless we explicitly give it the context or constraints that force it to think that way.
+
+The core issue here is that long term architectural thinking isn’t purely a question of intelligence. It is tightly tied to ownership over time. When we design a centralised system, we’re really making a decision to protect our future selves from future pain. That kind of decision depends on having a mental model of regret, maintenance cost, and the way complexity compounds as features pile on. Current AI doesn’t experience those pressures. It doesn’t feel the entropy of a codebase after two years of constant change, so it naturally converges on solutions that are locally correct rather than ones that are globally resilient.
+
+That’s why it can feel like the only reliable way to get good architecture out of an AI is to already know what the architecture should be and explicitly instruct it to build within that shape. In that setup, it’s acting as a very fast implementer that can execute well once the boundaries and principles are established.
+
+## Can you get an AI to be a competent architect?
+
+An AI can be a competent architect, with caveats. If we ask an AI to build software with maintainability in mind, and we’re explicit about the constraints and expectations, it absolutely can produce something that looks and behaves like a maintainable system. It can apply best practices, lean on centralisation, push towards single sources of truth, and generally avoid the obvious traps.
+
+The issue is that someone still needs to validate it. A system can generate an architecture that sounds plausible, even elegant, while quietly baking in the wrong assumptions or creating complexity in places that do not pay off. Without a competent reviewer, it’s hard to know what’s genuinely correct versus what simply reads well. The model can describe tradeoffs, but it can’t independently confirm that the tradeoffs match the actual product needs, performance constraints, security posture, or operational realities of the system it’s being dropped into.
+
+We can improve things by splitting responsibilities across agents. If we have a dedicated “architect” agent whose job is to plan structure, boundaries, and long term resilience, and then a separate implementation agent that follows that plan, we can get decent results. In practice though, we still run into the same fundamental problem. We still need someone to judge whether the architecture is actually sound. Without that, the AI can confidently produce something that is subtly wrong, or wildly over engineered, and the person prompting it won’t necessarily realize until the system is already in motion.
+
+## Why doesn't AI do well in this case?
+
+Everything I’ve written here is based purely on my own experience and a fair bit of hypothesis, and that applies to this section as well. I don’t claim to have a definitive answer. This is simply my personal view on why AI seems to struggle in this particular area, and I think it comes down to a combination of factors.
+
+The first is that AI companies are very clearly pouring huge amounts of effort into making models that are exceptionally good at coding. And to be fair, that progress is obvious. They’re getting closer and closer to that goal with every iteration. The issue is that designing a robust system goes well beyond the ability to write code. You can throw an enormous amount of intelligence at a problem, but raw intelligence on its own isn’t enough to guarantee good architecture.
+
+Coding a system and designing its architecture are closely related, but they’re fundamentally different disciplines. At a very simple level, one is about execution and the other is about long-term responsibility. Coding is about making something work now. Architecture is about deciding how that thing should exist, evolve, and be maintained over time.
+
+For an AI to build a production ready system at the level of a seasoned developer, it would need to reason about counterfactual futures and actively penalise designs that lead to combinatorial growth in complexity. In other words, it would need some way to model maintenance cost and architectural decay, and treat those as first class concerns rather than side effects.
+
+Architecture is value judgement. We choose centralisation, composability, and extensibility because we believe those qualities matter more than shipping as fast as possible. Another team might make the opposite call and accept duplication or messiness if speed is the priority. An AI can’t reliably pick between those tradeoffs unless we tell it what we value, because the “best” choice depends on context.
+
+## Does it matter?
+
+It depends. Honestly, for a lot of systems, it doesn’t really matter. If something is running locally on a machine, who actually cares if the code is a nightmare to maintain? If the AI can still work with it and make changes when needed, the long term cleanliness of the codebase becomes far less important.
+
+The same goes for the “ship fast, ship often” crowd, which is a growing group of people deploying applications almost entirely built by AI agents in the hope of striking gold. If it’s working and delivering value, then fair enough. It’s hard to argue against results, even if the internals are messy.
+
+Where it starts to matter is when you’re forced to make tradeoffs. Do you value robustness more than speed? How much security does the application actually require? As soon as a system starts handling personal information, even something as simple as email addresses, the bar changes completely. That’s the point where due diligence really matters. Personally, I would never be comfortable touching an AI generated system that handles credentials like emails and passwords without heavy human oversight and review.
+
+There’s already a growing trend of people getting burned by relying too heavily on AI generated systems. Coming back to the earlier example, imagine that theoretical exploit in the battle system that allows characters to receive a higher bonus than intended. In a non-robust system without single sources of truth, that same exploit could exist in multiple places at once. You can ask the AI to “fix the bug” and it might fix it in places A and B. But what about place C? If the logic is duplicated and scattered, there’s no guarantee everything gets caught.
+
+## Can it be solved?
+
+Almost certainly. I’d even argue that we’re already most of the way there. The catch is that you still need someone competent enough to judge whether what the AI is producing is actually sound, secure, and robust enough to avoid the long term pain that comes with a poorly designed system.
+
+For the layperson though, probably not. At least not yet. And I’m not convinced we’ll get there any time soon, largely because this is a fundamentally different problem to simply being able to write code. I’m also not sure enough resources are being invested into this specific area. Building an application end to end and getting it to work is one thing. Building an application end to end that is robust, secure, maintainable, and extensible over time is something else entirely. Those qualities are rarely obvious in the early days, especially to people without experience of long-lived systems.
+
+That was certainly the case with my first game, SimpleMMO. For the first few years, everything felt fine. The cracks only really started to show after two or three years of accumulated technical debt. That’s when things became harder to reason about, harder to change safely, and far more confusing than they ever needed to be.
+
+After doing a bit of reading, it turns out there has already been some research exploring this exact problem space. One paper in particular, “[Generative AI for Software Architecture. Applications, Challenges, and Future Directions](https://arxiv.org/abs/2503.13310)” looks directly at how generative AI performs when applied to architectural work rather than pure implementation. Its conclusions line up very closely with the examples I’ve described above.
+
+The paper suggests that GenAI is currently strong at accelerating understanding, documentation, and early stage exploration. It helps people reason about existing structures, translate between representations, and move faster on localised decisions. Where it consistently falls short is in trade off analysis, long term evolution, and quality assurance. In other words, it’s good at working within a system, but weak at stewarding that system over long horizons.
+
+Another paper, “[Artificial Intelligence for Software Architecture: Literature Review and the Road Ahead](https://www.researchgate.net/publication/390570432_Artificial_Intelligence_for_Software_Architecture_Literature_Review_and_the_Road_Ahead)”, reaches a very similar conclusion. It notes that while AI systems have made strong progress in code generation and even in providing isolated architectural recommendations, they remain fundamentally limited when it comes to supporting long term architectural evolution.
+
+The paper highlights that current AI approaches tend to produce one off, locally correct solutions, and consistently struggle to account for future system growth, responsibility boundaries, and the accumulation of technical debt.
+
+## Conclusion
+
+In conclusion, AI agents are becoming phenomenal to the point where it genuinely feels like magic. The fact that we can tell a system to do A and it will reliably do A, often with very little friction, is nothing short of remarkable.
+
+That said, in my opinion, we’re still a long way from AI being completely self-sufficient for the average layperson. Asking an AI to build a portfolio website is one thing. Asking it to design and ship a fully fledged SaaS product is an entirely different challenge. At this point, there’s little doubt that it can do it from a purely technical standpoint. The more important question is whether it should. It brings to mind that well known line from Jurassic Park: “Your scientists were so preoccupied with whether or not they could, they didn’t stop to think if they should.”
+
+As soon as an application introduces real security concerns or starts handling personal data, the stakes change. At that point, at least in my opinion, human oversight stops being optional. A competent developer needs to be responsible for the system’s architecture, its security posture, and its long term behavior. 
+
+AI can be an incredibly powerful tool in that process, but it’s not yet a substitute for system stewardship.
