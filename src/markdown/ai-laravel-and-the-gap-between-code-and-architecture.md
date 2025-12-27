@@ -5,6 +5,8 @@ title: AI, Laravel, and the Gap Between Code and Architecture
 
 # AI, Laravel, and the Gap Between Code and Architecture
 
+**Created:** 27th December 2025 <span class='text-zinc-400'>//</span> **Updated:** 28th December 2025
+
 AI has moved at an insane pace over the last few years. I love it about it as much as the next guy, probably more so. At the same time, it’s hard to ignore how both fascinating and unsettling it is to watch this technology advance so quickly and weave itself into everyday life. From a software development perspective, the progress we’ve seen in AI agents over such a short period is genuinely staggering. I’m not sure we’ve ever witnessed this level of rapid advancement reach the average person in quite the same way before.
 
 I only really started using AI agents around April this year, and my usage has steadily increased since then. A big part of that is the constant arms race between the major companies, each trying to outdo the others with their models. You can clearly see how much effort is being poured into coding-focused models in particular. I often see people nitpicking what these agents can’t do, pointing out very specific edge cases or shortcomings, yet the fact that this is even a discussion feels almost unbelievable compared to where things were a year ago. ChatGPT has been around for a while, but being able to tell a machine “go and make me a website” and have it produce something of genuinely reasonable quality is nothing short of astonishing.
