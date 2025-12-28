@@ -1,6 +1,7 @@
 ---
 
 title: AI, Laravel, and the Gap Between Code and Architecture
+
 ---
 
 # AI, Laravel, and the Gap Between Code and Architecture
@@ -17,7 +18,7 @@ AI models are getting exceptionally good at coding. It’s hard to argue otherwi
 
 Before continuing, I want to make it clear that this is written purely from my own experience. I follow the development of AI closely, both as a spectator and as a software developer, and most of what I know comes from what I have read, watched, and experimented with along the way. I do not work as an AI engineer, and I am not presenting this as expert analysis. That said, the patterns and issues I am about to discuss closely reflect what I have observed in real-world use, which felt worth sharing.
 
-## The Problem 
+## The Problem
 
 The issue with these coding models is that, while they continue to raise the bar in terms of raw programming ability, they still struggle when it comes to designing components and architectures that lead to systems which are genuinely robust and secure over time. Put more simply, they’re excellent builders. Where they fall is in the architectural thinking that sits behind a well designed codebase. I’ll expand on what I mean by that.
 
@@ -45,16 +46,14 @@ In both games we’ve got a “potion” mechanic. You consume a potion and it g
 
 In SimpleMMO, with the narrow approach I mentioned earlier, it started off very directly. When a battle finishes, we calculate the base experience from the enemy, then we apply any modifiers, in this case the potion. Job done. It’s simple, and it works.
 
-Then a few weeks later we introduce another source of bonus XP, say a magical item that grants +20% experience while it’s equipped. So we just add another condition into the same battle calculation. You end up with something along these lines when you finalise the battle:
+Then a few weeks later we introduce another source of bonus experience, say a magical item that grants +20% experience while it’s equipped. So we just add another condition into the same battle calculation. You end up with something along these lines when you finalise the battle:
 
 ```
 $base_experience = 100;
 $potion_modifier = 0.5; // 50%
 $magical_item_modifier = 0.2; // 20%
-
 $potion_bonus = $has_taken_potion ? $base_experience * $potion_modifier : 0;
 $magical_item_bonus = $has_magical_item ? $base_experience * $magical_item_modifier : 0;
-
 $final_experience = $base_experience + $potion_bonus + $magical_item_bonus;
 ```
 
@@ -89,24 +88,21 @@ That allows the calculation code to become stupidly simple:
 calculate(Character $character, int $base_experience): int
 {
     $collective_bonus = $character->bonuses()->sum('value');
-
-    return $base_experience * $collective_bonus;
+    return (int) ($base_experience * $collective_bonus);
 }
-
 // Calculating experience for a battle
 $experience = $this->character_bonus->calculate($character, $base_experience);
 ```
-
 
 The code becomes cleaner, easier to refactor, and far more robust by default. This is exactly how we handle it in our newer game, IdleMMO, and the difference is night and day. Adding new bonus sources stops being a risky refactor and becomes a straightforward data change, which makes long term maintenance dramatically easier.
 
 This is just one very straightforward example, and there are far more complex areas in real world applications where the same principle applies. Many features benefit from having a single source of truth, especially when multiple systems intersect and build on top of each other, which only increases overall complexity. The point here isn’t that this is a particularly advanced pattern, but that it clearly highlights the exact kind of thinking AI still seems to struggle with when it comes to software development.
 
-## AI's Involvement
+## How AI Approaches Architecture
 
 The core issue I’ve found with AI is that it still tends to think in a very single minded way and it’s not something I’ve really seen improve in any profound sense, especially when you compare it to the raw leaps in capability and intelligence we’ve seen over the past year. After sitting with it for a while, it starts to make a lot of sense why that is.
 
-While this is seemingly, on the surface, a fairly simple solution, in practical terms, it’s not really. A lot of the times, its only something  you really encounter or even consider to be a problem when you have both the experience of working with such legacy systems and single-minded ways of working, and are also in the opportunity to look drastically ahead and to be able to make significant architectural design decisions that will prevent these issues from happening in the first place. 
+While this is seemingly, on the surface, a fairly simple solution, in practical terms, it’s not really. A lot of the time, its only something  you really encounter or even consider to be a problem when you have both the experience of working with such legacy systems and single-minded ways of working, and are also in the opportunity to look drastically ahead and to be able to make significant architectural design decisions that will prevent these issues from happening in the first place.
 
 Most AI agents optimise around closing the current “ticket”. They focus on satisfying the immediate requirement in front of them, rather than protecting the codebase from what it might look like five or ten iterations down the line. Even when a model can reason abstractly about architecture, the default behaviour is still to produce the smallest possible change that meets the prompt. That happens because it has limited visibility into the future roadmap and often an incomplete understanding of the system’s true boundaries. Given those constraints, the locally optimal move is to add another conditional, duplicate a modifier, or patch the battle reward logic in place. Over time, those locally sensible decisions accumulate into exactly the kind of scattered, fragile architecture we’ve been talking about.
 
@@ -118,7 +114,7 @@ The way we’ve found to get AI to behave more consistently is to encode those a
 
 Pair that with a lightweight architecture map of the existing system, outlining which services own combat, inventory, buffs, and user state, and the behaviour shifts noticeably. The model stops guessing how things might fit together and starts designing within the boundaries it’s been given. Without that context, it will almost always gravitate towards patching the nearest function, because from its perspective, that’s the safest and least risky interpretation of the request.
 
-## Reliance on the prompter
+## Dependence on the Prompter
 
 The problem with that approach is that it pushes the responsibility for robustness back onto the prompter, and by extension, their ability to design the system properly. If we have to pre-bake architectural rules into the prompt to get good architecture out, then we’re still relying on the human to be the architect, which is the exact gap we’re trying to close in the first place.
 
@@ -126,17 +122,21 @@ Right now, AI systems tend to optimise for task completion, not system stewardsh
 
 Humans usually assume evolution by default. We’ve seen how software expands, how requirements creep, and how today’s quick patch becomes tomorrow’s maintenance burden. The model doesn’t carry that implicit assumption unless we explicitly give it the context or constraints that force it to think that way.
 
-The core issue here is that long term architectural thinking isn’t purely a question of intelligence. It is tightly tied to ownership over time. When we design a centralised system, we’re really making a decision to protect our future selves from future pain. That kind of decision depends on having a mental model of regret, maintenance cost, and the way complexity compounds as features pile on. Current AI doesn’t experience those pressures. It doesn’t feel the entropy of a codebase after two years of constant change, so it naturally converges on solutions that are locally correct rather than ones that are globally resilient.
+The core issue here is that long term architectural thinking tied to ownership over time. It's not purely a question of intelligence. When we design a centralised system, we’re really making a decision to protect our future selves from future pain. That kind of decision depends on having a mental model of regret, maintenance cost, and the way complexity compounds as features pile on. Current AI doesn’t experience those pressures. It doesn’t feel the entropy of a codebase after two years of constant change, so it naturally converges on solutions that are locally correct rather than ones that are globally resilient.
 
 That’s why it can feel like the only reliable way to get good architecture out of an AI is to already know what the architecture should be and explicitly instruct it to build within that shape. In that setup, it’s acting as a very fast implementer that can execute well once the boundaries and principles are established.
 
-## Can you get an AI to be a competent architect?
+## Can AI Act as a Software Architect?
 
-An AI can be a competent architect, with caveats. If we ask an AI to build software with maintainability in mind, and we’re explicit about the constraints and expectations, it absolutely can produce something that looks and behaves like a maintainable system. It can apply best practices, lean on centralisation, push towards single sources of truth, and generally avoid the obvious traps.
+An AI can absolutely help with architecture, but that doesn’t automatically make it an architect. When an AI suggests a design that looks clean, maintainable, or well structured, it’s almost always doing so within boundaries that were already laid out for it. Those boundaries usually come from the prompt, the existing codebase, or an explicit set of rules about how things should be built. Within that space, it can explore options, apply familiar patterns, and talk through trade offs, but it isn’t really owning those decisions.
 
-The issue is that someone still needs to validate it. A system can generate an architecture that sounds plausible, even elegant, while quietly baking in the wrong assumptions or creating complexity in places that do not pay off. Without a competent reviewer, it’s hard to know what’s genuinely correct versus what simply reads well. The model can describe tradeoffs, but it can’t independently confirm that the tradeoffs match the actual product needs, performance constraints, security posture, or operational realities of the system it’s being dropped into.
+The moment a competent human needs to step in and sanity check the design, question its assumptions, or decide whether it actually makes sense for where the product is heading, the architectural responsibility still sits with that human. At that point, the AI is helping you move faster, filling in gaps, and executing on an idea. What it isn’t doing is taking responsibility for the long term shape of the system. That distinction matters, because architecture isn’t about who can sketch a structure, it’s about who is accountable when that structure starts to creak a few years down the line.
 
-We can improve things by splitting responsibilities across agents. If we have a dedicated “architect” agent whose job is to plan structure, boundaries, and long term resilience, and then a separate implementation agent that follows that plan, we can get decent results. In practice though, we still run into the same fundamental problem. We still need someone to judge whether the architecture is actually sound. Without that, the AI can confidently produce something that is subtly wrong, or wildly over engineered, and the person prompting it won’t necessarily realize until the system is already in motion.
+Until an AI can carry the weight of those long term consequences, it’s assisting with architecture, not actually practicing it.
+
+Will AI be able to act as a software architect in the future? I suspect it will. I don’t know exactly how that happens, and I’m very aware that I’m not an AI engineer with a deep understanding of how these systems are built internally. All I can really do is evaluate what’s available today, alongside the experiences of other developers working with these tools in real projects.
+
+That said, given the pace at which AI agents have improved over a relatively short period of time, I’d be surprised if this problem remained unsolved indefinitely. The gap between writing code and reasoning about long term system structure is real, but it doesn’t feel impossible. Whether that comes from better long horizon reasoning, some notion of ownership or cost over time, or entirely new approaches we haven’t seen yet, I don’t know.
 
 ## Why doesn't AI do well in this case?
 
@@ -178,10 +178,14 @@ The paper highlights that current AI approaches tend to produce one off, locally
 
 ## Conclusion
 
-In conclusion, AI agents are becoming phenomenal to the point where it genuinely feels like magic. The fact that we can tell a system to do A and it will reliably do A, often with very little friction, is nothing short of remarkable.
+In my personal opinion, AI agents are becoming seriously good to the point where it genuinely feels like magic. The fact that we can tell a system to do A and it will reliably do A, with relatively little friction (depending on complexity), is nothing short of remarkable.
 
-That said, in my opinion, we’re still a long way from AI being completely self-sufficient for the average layperson. Asking an AI to build a portfolio website is one thing. Asking it to design and ship a fully fledged SaaS product is an entirely different challenge. At this point, there’s little doubt that it can do it from a purely technical standpoint. The more important question is whether it should. It brings to mind that well known line from Jurassic Park: “Your scientists were so preoccupied with whether or not they could, they didn’t stop to think if they should.”
+That said, we’re still a long way from AI being completely self-sufficient for the average layperson. Asking an AI to build a portfolio website is one thing. Asking it to design and ship a fully fledged SaaS product is an entirely different challenge. At this point, there’s little doubt that it can do it from a purely technical standpoint. The more important question is whether it should. It brings to mind that well known line from Jurassic Park: “Your scientists were so preoccupied with whether or not they could, they didn’t stop to think if they should.”
 
-As soon as an application introduces real security concerns or starts handling personal data, the stakes change. At that point, at least in my opinion, human oversight stops being optional. A competent developer needs to be responsible for the system’s architecture, its security posture, and its long term behavior. 
+As soon as an application introduces real security concerns or starts handling personal data, the stakes change. At that point, at least in my opinion, human oversight stops being optional. A competent developer needs to be responsible for the system’s architecture, its security posture, and its long term behavior.
 
-AI can be an incredibly powerful tool in that process, but it’s not yet a substitute for system stewardship.
+Right now, AI behaves a lot like a very capable junior developer with no real sense of long term ownership. That isn’t meant as a criticism, and it’s certainly not something us developers are immune to either. The comparison I keep coming back to feels familiar because it mirrors how I approached problems early on in my career. I could make things work, follow patterns, and deliver features, but my focus was almost entirely on the immediate task in front of me.
+
+What changed over time was perspective. Experience teaches you to anticipate future requirements, to spot cross cutting concerns that deserve centralisation, and to recognise when a decision stops being local and starts shaping the wider system. These problems feel like a fundamentally different challenge to being a powerful coder, and one that AI doesn’t yet seem equipped to handle in a consistent or reliable way, largely because it doesn’t carry the cost of getting those decisions wrong over time.
+
+AI can be an incredibly powerful tool in that process, but, in my opinion, it’s not yet a substitute for system stewardship.
