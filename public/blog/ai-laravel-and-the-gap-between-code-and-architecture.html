@@ -130,8 +130,12 @@ calculate(Character $character, int $base_experience): int
     $collective_bonus = $character-&gt;bonuses()-&gt;sum('value');
     return (int) ($base_experience * $collective_bonus);
 }
+
 // Calculating experience for a battle
-$experience = $this-&gt;character_bonus-&gt;calculate($character, $base_experience);
+function finaliseBattle(Enemy $enemy, Character $character): int
+{
+    return $this-&gt;character_bonus_service-&gt;calculate($character, $enemy-&gt;experience);
+}
 </code></pre>
 <p>The code becomes cleaner, easier to refactor, and far more robust by default. This is exactly how we handle it in our newer game, IdleMMO, and the difference is night and day. Adding new bonus sources stops being a risky refactor and becomes a straightforward data change, which makes long term maintenance dramatically easier.</p>
 <p>This is just one very straightforward example, and there are far more complex areas in real world applications where the same principle applies. Many features benefit from having a single source of truth, especially when multiple systems intersect and build on top of each other, which only increases overall complexity. The point here isn’t that this is a particularly advanced pattern, but that it clearly highlights the exact kind of thinking AI still seems to struggle with when it comes to software development.</p>
