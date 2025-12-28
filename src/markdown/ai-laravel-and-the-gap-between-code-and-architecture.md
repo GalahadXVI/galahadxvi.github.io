@@ -202,4 +202,6 @@ Right now, AI behaves a lot like a very capable junior developer with no real se
 
 What changed over time was perspective. Experience teaches you to anticipate future requirements, to spot cross cutting concerns that deserve centralisation, and to recognise when a decision stops being local and starts shaping the wider system. These problems feel like a fundamentally different challenge to being a powerful coder, and one that AI doesn’t yet seem equipped to handle in a consistent or reliable way, largely because it doesn’t carry the cost of getting those decisions wrong over time.
 
+What concerns me most is the feeling that we may be entering a bubble. A lot of software is being shipped quickly with heavy reliance on AI agents, but the consequences of those decisions are unlikely to show up until much later, when systems start to strain under their own complexity.
+
 AI can be an incredibly powerful tool in that process, but, in my opinion, it’s not yet a substitute for system stewardship.
