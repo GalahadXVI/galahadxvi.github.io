@@ -81,7 +81,7 @@ Then we add quests, and quest completion needs to respect the same modifiers, so
 
 So we end up with a bunch of distinct features that all rely on essentially the same logic, except they each carry their own isolated copy of it. They look similar, they behave similarly, but they’re not actually connected in any meaningful way.
 
-Then, let’s say, down the line, we hit a real world problem. Someone finds an exploit where they’re getting a larger bonus than they should. So we start tracing through every place experience is calculated and patching the bug. Except now we must fix it in every single implementation. We inevitably miss one or two, and suddenly the behavior depends on where the XP came from, because different parts of the codebase are applying “the same” logic in slightly different ways.
+Then, hypothetically speaking, let’s say, down the line, we hit a real problem. Someone finds an exploit where they’re getting a larger bonus than they should. So we start tracing through every place experience is calculated and patching the bug. Except now we must fix it in every single implementation. We inevitably miss one or two, and suddenly the behavior depends on where the XP came from, because different parts of the codebase are applying “the same” logic in slightly different ways.
 
 After two or three years of this, maintainability becomes a complete nightmare. The frustrating part is that in the early days, even the early years, it all felt totally fine. Nothing was obviously on fire, and it was hard to justify spending time refactoring something that appeared to be working. But it behaves like a line of dominoes. Once one area starts to wobble, everything connected to it starts collapsing right behind it.
 
