@@ -161,7 +161,7 @@ That said, given the pace at which AI agents have improved over a relatively sho
 
 ## Why doesn't AI do well in this case?
 
-Again, to reiterate, wverything I’ve written here is based purely on my own experience and a fair bit of hypothesis, and that applies to this section as well. I don’t claim to have a definitive answer. This is simply my personal view on why AI seems to struggle in this particular area, and I think it comes down to a combination of factors.
+Again, to reiterate, everything I’ve written here is based purely on my own experience and a fair bit of hypothesis, and that applies to this section as well. I don’t claim to have a definitive answer. This is simply my personal view on why AI seems to struggle in this particular area, and I think it comes down to a combination of factors.
 
 The first is that AI companies are very clearly pouring huge amounts of effort into making models that are exceptionally good at coding. And to be fair, that progress is obvious. They’re getting closer and closer to that goal with every iteration. The issue is that designing a robust system goes well beyond the ability to write code. You can throw an enormous amount of intelligence at a problem, but raw intelligence on its own isn’t enough to guarantee good architecture.
 
