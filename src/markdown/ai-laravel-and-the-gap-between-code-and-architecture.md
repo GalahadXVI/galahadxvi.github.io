@@ -77,7 +77,7 @@ But then the pattern kicks in. A few more weeks go by and we add a game wide eve
 
 A few months pass and then we throw in the real complication. Up until this point, those bonuses only applied to battles, but what happens when we want the same bonuses to affect other actions too? So we replicate the logic elsewhere, like when a player gains experience from exploring the world. Great, it works, everything still behaves as expected.
 
-Then we add quests, and quest completion needs to respect the same modifiers, so we do it again. Then another feature comes along that awards experience, so we do it again. And then another. You can see where this goes. The “bonus XP logic” stops being a battle concern and turns into a cross cutting rule that we keep re-implementing, feature by feature, until it’s scattered all over the codebase.
+Then we add quests, and quest completion needs to respect the same modifiers, so we do it again. Then another feature comes along that awards experience, so we do it again. And then another. You can see where this goes. The “bonus experience logic” stops being a battle concern and turns into a cross cutting rule that we keep re-implementing, feature by feature, until it’s scattered all over the codebase.
 
 So we end up with a bunch of distinct features that all rely on essentially the same logic, except they each carry their own isolated copy of it. They look similar, they behave similarly, but they’re not actually connected in any meaningful way.
 
