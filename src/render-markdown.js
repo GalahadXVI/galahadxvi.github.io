@@ -11,7 +11,7 @@ const linkRenderer = renderer.link;
 renderer.link = (href, title, text) => {
     const html = linkRenderer.call(renderer, href, title, text);
     const isExternal = href && (href.startsWith('http://') || href.startsWith('https://'));
-    return isExternal ? html.replace(/^<a /, '<a target="_blank" rel="noopener noreferrer" ') : html;
+    return isExternal ? html.replace(/^<a /, '<a target="_blank" rel="noopener noreferrer nofollow" ') : html;
 };
 
 const scriptDir = path.resolve(__dirname); // Get the directory of the current script
