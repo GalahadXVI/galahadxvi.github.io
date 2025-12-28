@@ -46,15 +46,29 @@ In both games we’ve got a “potion” mechanic. You consume a potion and it g
 
 In SimpleMMO, with the narrow approach I mentioned earlier, it started off very directly. When a battle finishes, we calculate the base experience from the enemy, then we apply any modifiers, in this case the potion. Job done. It’s simple, and it works.
 
+
+```
+function finaliseBattle(Enemy $enemy): int
+{
+    $base_experience = $enemy->experience;
+    $potion_modifier = 0.5; // 50%
+    $potion_bonus = $has_taken_potion ? $base_experience * $potion_modifier : 0;
+    return $final_experience = (int) ($base_experience + $potion_bonus);
+}
+```
+
 Then a few weeks later we introduce another source of bonus experience, say a magical item that grants +20% experience while it’s equipped. So we just add another condition into the same battle calculation. You end up with something along these lines when you finalise the battle:
 
 ```
-$base_experience = 100;
-$potion_modifier = 0.5; // 50%
-$magical_item_modifier = 0.2; // 20%
-$potion_bonus = $has_taken_potion ? $base_experience * $potion_modifier : 0;
-$magical_item_bonus = $has_magical_item ? $base_experience * $magical_item_modifier : 0;
-$final_experience = $base_experience + $potion_bonus + $magical_item_bonus;
+function finaliseBattle(Enemy $enemy): int
+{
+    $base_experience = $enemy->experience;
+    $potion_modifier = 0.5; // 50%
+    $magical_item_modifier = 0.2; // 20%
+    $potion_bonus = $has_taken_potion ? $base_experience * $potion_modifier : 0;
+    $magical_item_bonus = $has_magical_item ? $base_experience * $magical_item_modifier : 0;
+    return $final_experience = (int) ($base_experience + $potion_bonus + $magical_item_bonus);
+}
 ```
 
 Still fine. Still readable. Still does the job.
