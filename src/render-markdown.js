@@ -4,6 +4,16 @@ const path = require('path'); // Path module for handling file paths
 const jsdom = require('jsdom'); // jsdom module for DOM manipulation
 const { JSDOM } = jsdom; // Destructuring JSDOM for ease of use
 const marked = require('marked').marked; // Importing marked library for Markdown to HTML conversion
+
+// Custom renderer to add target="_blank" to external links
+const renderer = new (require('marked').Renderer)();
+const linkRenderer = renderer.link;
+renderer.link = (href, title, text) => {
+    const html = linkRenderer.call(renderer, href, title, text);
+    const isExternal = href && (href.startsWith('http://') || href.startsWith('https://'));
+    return isExternal ? html.replace(/^<a /, '<a target="_blank" rel="noopener noreferrer" ') : html;
+};
+
 const scriptDir = path.resolve(__dirname); // Get the directory of the current script
 const rootDir = path.resolve(scriptDir, '..'); // Get the root directory by going up one level
 
@@ -56,7 +66,7 @@ function convertMarkdownToHtml(content, title) {
     const twitterTitle = document.querySelector('meta[property="twitter:title"]');
     twitterTitle.setAttribute('content', title);
 
-    const htmlContent = marked(content);
+    const htmlContent = marked(content, { renderer });
 
     const markdownElement = document.getElementById('markdown-content');
     markdownElement.innerHTML = htmlContent;
