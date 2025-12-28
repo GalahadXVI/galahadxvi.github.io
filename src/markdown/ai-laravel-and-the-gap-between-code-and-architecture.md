@@ -106,8 +106,13 @@ calculate(Character $character, int $base_experience): int
     $collective_bonus = $character->bonuses()->sum('value');
     return (int) ($base_experience * $collective_bonus);
 }
+
 // Calculating experience for a battle
-$experience = $this->character_bonus->calculate($character, $base_experience);
+function finaliseBattle(Enemy $enemy, Character $character): int
+{
+    return $this->character_bonus_service->calculate($character, $enemy->experience);
+}
+
 ```
 
 The code becomes cleaner, easier to refactor, and far more robust by default. This is exactly how we handle it in our newer game, IdleMMO, and the difference is night and day. Adding new bonus sources stops being a risky refactor and becomes a straightforward data change, which makes long term maintenance dramatically easier.
