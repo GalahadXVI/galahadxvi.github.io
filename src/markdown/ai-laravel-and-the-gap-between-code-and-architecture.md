@@ -181,7 +181,7 @@ Where it starts to matter is when you’re forced to make tradeoffs. Do you valu
 
 There’s already a growing trend of people getting burned by relying too heavily on AI generated systems. Coming back to the earlier example, imagine that theoretical exploit in the battle system that allows characters to receive a higher bonus than intended. In a non-robust system without single sources of truth, that same exploit could exist in multiple places at once. You can ask the AI to “fix the bug” and it might fix it in places A and B. But what about place C? If the logic is duplicated and scattered, there’s no guarantee everything gets caught.
 
-There are likely countless examples of this happening. [Here](https://www.reddit.com/r/csMajors/comments/1jg39g2/looks_like_vibe_coding_failed_him/) is one. [Here](https://www.reddit.com/r/vibecoding/comments/1jtd2xo/vibe_coders_are_getting_hacked/) is another. It's certainly concerning.
+There are likely countless examples of this happening. [Here](https://www.reddit.com/r/csMajors/comments/1jg39g2/looks_like_vibe_coding_failed_him/) is one. [Here](https://www.reddit.com/r/vibecoding/comments/1jtd2xo/vibe_coders_are_getting_hacked/) is another. It's definitely concerning.
 
 ## Can it be solved?
 
