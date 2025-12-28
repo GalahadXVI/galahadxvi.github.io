@@ -95,7 +95,7 @@ Together, these address two of the biggest problems around robustness and mainta
 
 Secondly, it removes the need to tie checks into every individual area of the game. With the old approach, we’d be manually checking conditions all over the place. Is the character holding a magical item? Are they in a group? Is there an active event? Each new bonus meant adding more conditional logic wherever experience was calculated. As the codebase grows, that quickly turns into a mess because more and more systems need to be aware of more and more rules.
 
-With a centralised `CharacterBonus` model, that responsibility shifts to the edges of the system instead. When a character equips or unequips a magical item, we create or remove a corresponding CharacterBonus record. When they join or leave a group, we do the same. The rest of the game no longer needs to care why a bonus exists, only that it does. Experience calculations simply consume the data that already represents the character’s current state.
+With a centralised `CharacterBonus` model, that responsibility shifts to the edges of the system instead. When a character equips or unequips a magical item, we create or remove a corresponding `CharacterBonus` record. When they join or leave a group, we do the same. The rest of the game no longer needs to care why a bonus exists, only that it does. Experience calculations simply consume the data that already represents the character’s current state.
 
 That allows the calculation code to become stupidly simple:
 
