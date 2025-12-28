@@ -167,7 +167,7 @@ The first is that AI companies are very clearly pouring huge amounts of effort i
 
 Coding a system and designing its architecture are closely related, but they’re fundamentally different disciplines. At a very simple level, one is about execution and the other is about long-term responsibility. Coding is about making something work now. Architecture is about deciding how that thing should exist, evolve, and be maintained over time.
 
-For an AI to build a production ready system at the level of a seasoned developer, it would need to reason about counterfactual futures and actively penalise designs that lead to combinatorial growth in complexity. In other words, it would need some way to model maintenance cost and architectural decay, and treat those as first class concerns rather than side effects.
+For an AI to build a production-ready system at the level of an experienced developer, it would need to think beyond the immediate solution and reason about how the system might evolve over time. That means being able to anticipate future changes, recognise designs that cause complexity to grow out of control, and deliberately avoid them. It would also need a way to model maintenance effort and architectural decay, treating those as core design concerns rather than unintended consequences.
 
 Architecture is value judgement. We choose centralisation, composability, and extensibility because we believe those qualities matter more than shipping as fast as possible. Another team might make the opposite call and accept duplication or messiness if speed is the priority. An AI can’t reliably pick between those tradeoffs unless we tell it what we value, because the “best” choice depends on context.
 
