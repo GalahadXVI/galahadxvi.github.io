@@ -81,7 +81,9 @@ Then we add quests, and quest completion needs to respect the same modifiers, so
 
 So we end up with a bunch of distinct features that all rely on essentially the same logic, except they each carry their own isolated copy of it. They look similar, they behave similarly, but they’re not actually connected in any meaningful way.
 
-Then, hypothetically speaking, let’s say, down the line, we hit a real problem. Someone finds an exploit where they’re getting a larger bonus than they should. So we start tracing through every place experience is calculated and patching the bug. Except now we must fix it in every single implementation. We inevitably miss one or two, and suddenly the behavior depends on what is fixed and what isn't, because different parts of the codebase are applying “the same” logic in slightly different ways.
+Then, hypothetically, we eventually hit a real problem. Someone discovers an exploit that lets them gain more experience than intended. We start tracing through the codebase, looking at every place experience is calculated, and patch the bug where we find it. The issue is that the logic exists in multiple places, so the fix has to be applied repeatedly across different implementations.
+
+Inevitably, one or two spots get missed. Now the system behaves inconsistently. Some parts of the game use the corrected logic, others still use the old version, and the outcome depends entirely on which path the code happens to take. What was supposed to be a single rule has quietly fractured into several slightly different ones, all claiming to represent the same behaviour.
 
 After two or three years of this, maintainability becomes a complete nightmare. The frustrating part is that in the early days, even the early years, it all felt totally fine. Nothing was obviously on fire, and it was hard to justify spending time refactoring something that appeared to be working. But it behaves like a line of dominoes. Once one area starts to wobble, everything connected to it starts collapsing right behind it.
 
