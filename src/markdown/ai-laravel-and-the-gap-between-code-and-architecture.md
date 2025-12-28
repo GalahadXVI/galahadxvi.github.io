@@ -26,7 +26,7 @@ Back when I was fresh out of uni, I built my first real project, SimpleMMO. It w
 
 The codebase was, and still is, pretty shocking. Genuinely bad in places. At the time, I was approaching development in a very narrow way, largely because I lacked the experience, guidance, and broader understanding needed to do things properly. I was focused on making things work, with very little awareness of structure, longevity, or the kinds of decisions that come back to haunt you years later.
 
-When I built features in the game back then, the process was very straightforward. I’d outline the idea, “right, I’m going to build X”, and then I’d just get on with it. I’d build the feature and move on. That was pretty much the entire thought process. Very little consideration went into anything beyond making it work, at least from a code architecture point of view. I’m not talking about feature design here, just how the code itself was structured.
+When I built features in the game back then, the development process was very straightforward. I’d outline the idea, “right, I’m going to build X”, and then I’d just get on with it. I’d build the feature and move on. That was pretty much the entire thought process. There was very little consideration for how it might need to evolve later. Aside from deciding whether the feature was worth building in the first place, my focus was almost entirely on making it work and making sure it was secure.
 
 If X needed a function called `a()`, I’d write `a()` purely for that one use case. Nothing else would ever touch it. It existed solely to make X work. And to be fair, it did work. It worked well. Arguably, it worked a little too well.
 
