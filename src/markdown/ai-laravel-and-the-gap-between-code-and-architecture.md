@@ -1,7 +1,6 @@
 ---
-
 title: AI, Laravel, and the Gap Between Code and Architecture
-
+og-image: og-image-ai-architecture.jpg
 ---
 
 # AI, Laravel, and the Gap Between Code and Architecture

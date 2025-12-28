@@ -50,9 +50,10 @@ function formatTitle(fileName) {
  * Converts Markdown content to HTML
  * @param {string} content - Markdown content
  * @param {string} title - Title for the HTML document
+     * @param {Object} frontMatter - Front matter data
  * @returns {string} The converted HTML content
  */
-function convertMarkdownToHtml(content, title) {
+function convertMarkdownToHtml(content, title, frontMatter) {
     const templateHtml = fs.readFileSync(path.join(scriptDir, '/templates/main.html'), 'utf8');
     const dom = new JSDOM(templateHtml);
     const document = dom.window.document;
@@ -65,6 +66,16 @@ function convertMarkdownToHtml(content, title) {
 
     const twitterTitle = document.querySelector('meta[property="twitter:title"]');
     twitterTitle.setAttribute('content', title);
+
+    if (frontMatter['og-image']) {
+        const ogImageUrl = `https://www.galahadsixteen.com/${frontMatter['og-image']}`;
+        const ogImage = document.querySelector('meta[property="og:image"]');
+        ogImage.setAttribute('content', ogImageUrl);
+        const twitterImage = document.querySelector('meta[property="twitter:image"]');
+        twitterImage.setAttribute('content', ogImageUrl);
+        const twitterUrl = document.querySelector('meta[property="twitter:url"]');
+        twitterUrl.setAttribute('content', ogImageUrl);
+    }
 
     const htmlContent = marked(content, { renderer });
 
@@ -88,7 +99,7 @@ fs.readdirSync(markdownDirectory).forEach(file => {
         let { frontMatter, content } = extractFrontMatter(markdownContent);
         const title = frontMatter.title || formatTitle(path.basename(file, '.md'));
 
-        const htmlContent = convertMarkdownToHtml(content, title);
+        const htmlContent = convertMarkdownToHtml(content, title, frontMatter);
 
         const outputFileName = path.basename(file, '.md') + '.html';
         const outputFilePath = path.join(outputDirectory, outputFileName);
