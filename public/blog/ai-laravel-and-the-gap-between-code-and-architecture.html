@@ -91,7 +91,7 @@
 <p>To anyone looking in from the outside, SimpleMMO and IdleMMO are extremely similar products. They’re both mobile text-based RPGs, just with slightly different play styles. One is idle, meaning much of the gameplay runs automatically, while the other is more traditional and requires active input. Under the hood though, the core concepts are effectively the same. You have a character, that character can take part in battles, and they gain experience and level up. On the surface, it’s all fairly straightforward.</p>
 <p>In both games we’ve got a “potion” mechanic. You consume a potion and it gives you a temporary boost, for example +50% experience for the next 30 minutes.</p>
 <p>In SimpleMMO, with the narrow approach I mentioned earlier, it started off very directly. When a battle finishes, we calculate the base experience from the enemy, then we apply any modifiers, in this case the potion. Job done. It’s simple, and it works.</p>
-<pre><code>function finaliseBattle(Enemy $enemy): int
+<pre><code>function finaliseBattle(Enemy $enemy, bool $has_taken_potion): int
 {
     $base_experience = $enemy-&gt;experience;
     $potion_modifier = 0.5; // 50%
@@ -100,7 +100,7 @@
 }
 </code></pre>
 <p>Then a few weeks later we introduce another source of bonus experience, say a magical item that grants +20% experience while it’s equipped. So we just add another condition into the same battle calculation. You end up with something along these lines when you finalise the battle:</p>
-<pre><code>function finaliseBattle(Enemy $enemy): int
+<pre><code>function finaliseBattle(Enemy $enemy, bool $has_token_potion, bool $has_magical_item): int
 {
     $base_experience = $enemy-&gt;experience;
     $potion_modifier = 0.5; // 50%

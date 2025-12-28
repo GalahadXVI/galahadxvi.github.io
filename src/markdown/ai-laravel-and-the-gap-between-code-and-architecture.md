@@ -48,7 +48,7 @@ In SimpleMMO, with the narrow approach I mentioned earlier, it started off very 
 
 
 ```
-function finaliseBattle(Enemy $enemy): int
+function finaliseBattle(Enemy $enemy, bool $has_taken_potion): int
 {
     $base_experience = $enemy->experience;
     $potion_modifier = 0.5; // 50%
@@ -60,7 +60,7 @@ function finaliseBattle(Enemy $enemy): int
 Then a few weeks later we introduce another source of bonus experience, say a magical item that grants +20% experience while it’s equipped. So we just add another condition into the same battle calculation. You end up with something along these lines when you finalise the battle:
 
 ```
-function finaliseBattle(Enemy $enemy): int
+function finaliseBattle(Enemy $enemy, bool $has_token_potion, bool $has_magical_item): int
 {
     $base_experience = $enemy->experience;
     $potion_modifier = 0.5; // 50%
