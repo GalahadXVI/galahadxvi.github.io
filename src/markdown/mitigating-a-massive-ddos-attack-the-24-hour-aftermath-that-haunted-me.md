@@ -15,7 +15,7 @@ The challenge with increased game exposure is the rise in malicious actors attem
 
 Though I possess experience in mitigating common OWASP vulnerabilities such as SQL Injection, XSS Attacks, and session hijacking, encountering Distributed Denial of Service attacks (DDoS for short) is something I didn’t really experience. This knowledge gap is understandable, as my previous products had limited exposure, which diminished the incentive for malicious actors to target my systems.
 
-However, in June 2021, everything changed. I was awoken around 6 am by a message: 'The game is down.' While I had grown accustomed to encountering such issues during my system scaling efforts, this instance felt particularly unsettling. Despite employing my usual measures, I found them ineffective in resolving the problem. It wasn't long before the unsettling thought of a DDoS attack crossed my mind.
+However, in June 2020, everything changed. I was awoken around 6 am by a message: 'The game is down.' While I had grown accustomed to encountering such issues during my system scaling efforts, this instance felt particularly unsettling. Despite employing my usual measures, I found them ineffective in resolving the problem. It wasn't long before the unsettling thought of a DDoS attack crossed my mind.
 
 I logged into CloudFlare to check the statistics. As I feared, some endpoints were inundated with a staggering 1.2 million requests per minute. The sheer scale was unfathomable, and it became apparent that the system was ill-prepared to handle such an onslaught.
 
