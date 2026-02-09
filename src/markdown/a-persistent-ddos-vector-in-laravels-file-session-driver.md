@@ -5,7 +5,7 @@ og-image: og-image-file-session.jpg
 
 # A Persistent DDoS Vector in Laravel’s File Session Driver
 
-In an earlier post, I mentioned a large DDoS attack against one of my applications and a performance issue that took far longer to understand than it should have. At the time, I wrote it off as a bad configuration choice and moved on. More recently, out of curiosity, I came back to it. I knew the file session driver was the cause, but I wanted to understand exactly what was happening under the hood.
+In an earlier post, I  a large DDoS attack against one of my applications and a performance issue that took far longer to understand than it should have. At the time, I wrote it off as a bad configuration choice and moved on. More recently, out of curiosity, I came back to it. I knew the file session driver was the cause, but I wanted to understand exactly what was happening under the hood.
 
 What I found is that someone can cause real disruption on a site that uses the file session driver by relying on how session garbage collection works.
 
@@ -21,7 +21,7 @@ This happens due to how Laravel creates and cleans up sessions during a request.
 
 On every request, Laravel runs a simple random check known as the session lottery. By default, around 2% of requests trigger the garbage collector. When a request is selected, the file session handler runs its garbage collection method synchronously. That 2% sounds small, but it adds up fast. This applies to every request that passes through the session middleware. Even a site with low traffic can hit this regularly, often every minute or so. And once the session directory has grown large, each of those runs is expensive.
 
-That method uses the Symfony Finder to scan the entire session directory, check file modification times, and then delete expired sessions. The key detail is that the full directory scan happens before any deletion. The cost grows linearly with the total number of session files. Even if only a handful of files are expired, the scan still walks every file. Since this runs inline during the request, users feel the latency right away. And once the directory gets large enough, everyday traffic is enough to keep the app stuck in this degraded state.
+That method uses the Symfony Finder to scan the entire session directory, check file modification times, and then delete expired sessions. The key detail is that the full directory scan happens before any deletion. The cost grows linearly with the total number of session files. Even if only a handful of files are expired, the scan still checks every file. Since this runs inline during the request, users feel the latency right away. And once the directory gets large enough, everyday traffic is enough to keep the app stuck in this degraded state.
 
 A short burst of requests can push the app into a bad state that sticks around long after the traffic stops. Once the session directory reaches that point, normal requests are enough to keep triggering costly cleanup work.
 
