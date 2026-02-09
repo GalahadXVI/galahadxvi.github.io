@@ -17,7 +17,7 @@ This is technically working as designed, but the important detail is the persist
 
 What makes this problem unusual is that the slowdown is no longer driven by live traffic. It’s driven by what that traffic leaves behind on disk. A short burst of requests can push the app into a bad state that sticks around long after the traffic stops. Once the session directory reaches that point, normal requests are enough to keep triggering costly cleanup work.
 
-In simple terms, someone can hit the site for a few minutes and cause chaos for hours. Each time session garbage collection runs, Laravel has to scan the entire session directory. This happens even when almost no files are actually removed. That scan runs inside the request cycle, so requests get blocked. CPU usage spikes, responses slow down or time out, and the app stays unhealthy until the sessions expire naturally or someone cleans them up by hand.
+In simple terms, someone can hit the site for a few minutes and cause chaos for hours. Each time the session garbage collection runs, Laravel has to scan the entire session directory. This happens even when almost no files are actually removed. That scan runs inside the request cycle, so requests get blocked. CPU usage spikes, responses slow down or time out, and the app stays unhealthy until the sessions expire naturally or someone cleans them up by hand.
 
 This comes from how Laravel creates and cleans up sessions during a request. If a request arrives without a valid session cookie, the `StartSession` middleware creates a new session ID. At the end of the request, that session is written to disk through `saveSession`. There is no throttling here. Every stateless request creates a new file in `storage/framework/sessions`.
 
@@ -27,7 +27,7 @@ That method uses the Symfony Finder to scan the entire session directory, check 
 
 ## Reproducing The Issue
 
-I was able to reproduce this locally on a fresh Laravel install using the file session driver. With around 200,000 session files on disk, request latency jumped from roughly 40ms to just over 2 seconds whenever the session garbage collector ran. The slowdown scaled more or less linearly with the number of files present.
+I was able to reproduce this locally on a fresh Laravel installation using the file session driver. With around 200,000 session files on disk, request latency jumped from roughly 40ms to just over 2 seconds whenever the session garbage collector ran. The slowdown scaled more or less linearly with the number of files present.
 
 To reach that point, I started with a new Laravel project and confirmed the sessions directory was empty. I set the session driver to file and loaded the site repeatedly while clearing cookies each time. This confirmed that a new session file was created on every request. After that, I simulated stateless traffic using ApacheBench to generate a large number of sessions quickly. To speed things up further, I also created session files directly on disk, which was much faster than simulating each request. I then verified the final count, which came out to 222,703 session files.
 
