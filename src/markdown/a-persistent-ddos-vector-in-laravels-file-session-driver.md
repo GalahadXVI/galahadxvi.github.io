@@ -48,7 +48,7 @@ It’s important to stress that this is not a logic bug. The system is doing exa
 The problem is that this limitation can be exploited on purpose. An attacker doesn’t need to break anything or bypass safeguards. They can rely on normal behavior to push the app into a bad state and leave it there. The result is real disruption caused with very little effort.
 
 # A Real-World Incident
-This isn’t just a theoretical issue. We ran straight into it during a real DDoS incident back in 2020. The attack itself was mitigated fairly quickly, but the application stayed in a badly degraded state long after traffic dropped off. CPU usage stayed high, response times kept climbing, and requests would randomly time out.
+This isn’t just a theoretical issue. We ran straight into it during a real DDoS incident [back in 2020](/blog/mitigating-a-massive-ddos-attack-the-24-hour-aftermath-that-haunted-me). The attack itself was mitigated fairly quickly, but the application stayed in a badly degraded state long after traffic dropped off. CPU usage stayed high, response times kept climbing, and requests would randomly time out.
 
 At first, we focused on the usual things. We deployed Cloudflare, checked the database, adjusted PHP settings, and even scaled the infrastructure. None of that helped. The problem was not ongoing load in the normal sense, so those changes only treated symptoms.
 
