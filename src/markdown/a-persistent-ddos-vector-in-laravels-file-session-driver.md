@@ -5,7 +5,7 @@ og-image: og-image-file-session.jpg
 
 # A Persistent DDoS Vector in Laravel’s File Session Driver
 
-In an earlier post, I mentioned a large-scale DDoS attack against one of my applications and a performance issue that took far longer to fully understand than it should have. At the time, I mostly wrote it off as an unfortunate configuration choice and moved on. Recently, out of curiosity, I went back to that incident to see if I could reproduce the behaviour in isolation and try to understand what is actually causing it to happen.
+In an earlier post, I mentioned a large DDoS attack against one of my applications and a performance issue that took far longer to understand than it should have. At the time, I wrote it off as a bad configuration choice and moved on. More recently, out of curiosity, I came back to it. I knew the file session driver was the cause, but I wanted to understand exactly what was happening under the hood.
 
 What I found is that someone can cause real disruption on a site that uses the file session driver by relying on how session garbage collection works.
 
