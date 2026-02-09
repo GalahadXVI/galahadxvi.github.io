@@ -1,0 +1,75 @@
+---
+title: A Persistent DDoS Vector in Laravel’s File Session Driver
+og-image: og-image-file-session.jpg
+---
+
+# A Persistent DDoS Vector in Laravel’s File Session Driver
+
+In an earlier post, I mentioned a large-scale DDoS attack against one of my applications and a performance issue that took far longer to fully understand than it should have. At the time, I mostly wrote it off as an unfortunate configuration choice and moved on. Recently, out of curiosity, I went back to that incident to see if I could reproduce the behaviour in isolation and try to understand what is actually causing it to happen.
+
+The core issue is that the file session garbage collector runs synchronously as part of the request lifecycle and performs a O(n) directory scan across every session file on disk. That means the cost of cleanup grows directly with the number of session files present. An attacker does not need to do anything particularly clever here. By sending a high volume of requests without session cookies, they can force Laravel to create a new session file on every request.
+
+Over time, this fills `storage/framework/sessions` with hundreds of thousands or even millions of files, all sitting in a single flat directory. Once that state exists on disk, the damage lingers. Even after the attack traffic stops, normal requests continue to trigger garbage collection runs that now have to scan an enormous directory. The result is that every unlucky request that hits the GC path pays that full cost.
+
+This is technically working as designed, but the important detail is the persistence of the impact.
+
+# Why degradation persists
+
+What makes this problem unusual is that the slowdown is no longer driven by live traffic. It’s driven by what that traffic leaves behind on disk. A short burst of requests can push the app into a bad state that sticks around long after the traffic stops. Once the session directory reaches that point, normal requests are enough to keep triggering costly cleanup work.
+
+In simple terms, someone can hit the site for a few minutes and cause chaos for hours. Each time session garbage collection runs, Laravel has to scan the entire session directory. This happens even when almost no files are actually removed. That scan runs inside the request cycle, so requests get blocked. CPU usage spikes, responses slow down or time out, and the app stays unhealthy until the sessions expire naturally or someone cleans them up by hand.
+
+This comes from how Laravel creates and cleans up sessions during a request. If a request arrives without a valid session cookie, the StartSession middleware creates a new session ID. At the end of the request, that session is written to disk through saveSession. There is no throttling here. Every stateless request creates a new file in `storage/framework/sessions`.
+
+On every request, Laravel runs a simple random check known as the session lottery. By default, around 1 percent of requests trigger garbage collection. When a request is selected, the file session handler runs its gc method synchronously. That 1 percent sounds small, but it adds up fast. This applies to every request that passes through the session middleware. Even a site with low traffic can hit this regularly, often every minute or so. And once the session directory has grown large, each of those runs is expensive.
+
+That method uses Symfony Finder to scan the entire session directory, check file modification times, and then delete expired sessions. The key detail is that the full directory scan happens before any deletion. The cost grows linearly with the total number of session files. Even if only a handful of files are expired, the scan still walks every file. Since this runs inline during the request, users feel the latency right away. And once the directory gets large enough, everyday traffic is enough to keep the app stuck in this degraded state.
+
+# Reproduction
+
+I was able to reproduce this locally on a fresh Laravel install using the file session driver. With around 200,000 session files on disk, request latency jumped from roughly 40ms to just over 2 seconds whenever the session garbage collector ran. The slowdown scaled more or less linearly with the number of files present.
+
+To reach that point, I started with a new Laravel project and confirmed the sessions directory was empty. I set the session driver to file and loaded the site repeatedly while clearing cookies each time. This confirmed that a new session file was created on every request. After that, I simulated stateless traffic using ApacheBench to generate a large number of sessions quickly. To speed things up further, I also created session files directly on disk, which was much faster than simulating each request. I then verified the final count, which came out to 222,703 session files.
+
+Next, I forced the session lottery to run on every request by setting it to `[1,1]`. This setup is not realistic for production, but with enough traffic, the default lottery value of 100 would still trigger cleanup on a regular basis. With that configuration in place, loading the page locally produced a response time of 2.13 seconds. Under normal conditions, the same request completed in about 41ms. That’s roughly a 5,100% increase in latency.
+
+What stands out is that even modest repeated traffic can push the system into this degraded state. The key issue is that the impact remains after the traffic stops. Around 200,000 session files is not an extreme number, yet scanning them during garbage collection is enough to cause very noticeable slowdowns.
+
+In practice, a site using the file session driver could take a serious performance hit for hours after a short burst of traffic. A simple command like `ab -n 100000 -c 10 https://www.yourwebsite.com` could be enough to leave the application struggling long after those requests have finished.
+
+# Why this is noteworthy
+
+Flooding a service with requests is nothing new. Scanning files for cleanup is also nothing new. When you look at how these pieces fit together, the behavior itself is easy to explain. What stands out is how easily the system can slip into a degraded state, and how unclear the recovery path is once that happens.
+
+A simple command, or a fairly unsophisticated actor, can cause a lot of disruption. That disruption can last for hours after the traffic stops. At that point, ongoing load is no longer the issue. Garbage collection keeps doing expensive work because of what’s already on disk.
+
+It’s important to stress that this is not a logic bug. The system is doing exactly what it was designed to do. File-based session storage has well-known limits, and Laravel already offers other session drivers for higher-scale or more hostile environments.
+
+The problem is that this limitation can be exploited on purpose. An attacker doesn’t need to break anything or bypass safeguards. They can rely on normal behavior to push the app into a bad state and leave it there. The result is real disruption caused with very little effort.
+
+# Real world incident
+This isn’t just a theoretical issue. We ran straight into it during a real DDoS incident back in 2020. The attack itself was mitigated fairly quickly, but the application stayed in a badly degraded state long after traffic dropped off. CPU usage stayed high, response times kept climbing, and requests would randomly time out.
+
+At first, we focused on the usual things. We deployed Cloudflare, checked the database, adjusted PHP settings, and even scaled the infrastructure. None of that helped. The problem was not ongoing load in the normal sense, so those changes only treated symptoms.
+
+After many hours of digging, it became clear that session cleanup was taking up most of the request time. During the attack, every request without a session cookie created a new session file. The garbage collection had to trawl through a huge backlog of files over and over again.
+
+The DDoS was still hurting us even after it ended, purely because we were using the file session driver. The immediate fix was to lower the session lifetime so garbage collection could eventually clear the backlog. Longer term, we moved sessions to Redis, which removed the problem entirely.
+
+Admittedly, we had session lifetime set quite high, which significantly exacerbated the problem. Because of that, I never really viewed it as a Laravel issue, but rather as an incredibly unfortunate configuration choice on our part.
+
+# Mitigation
+Before publishing this post, I reached out to Taylor and shared a detailed write-up of what I found. We both agreed there isn’t a clear fix beyond better guidance. The file session driver is behaving as designed. The real takeaway is that it’s not a good fit for apps that expect high traffic or hostile conditions.
+
+There are ideas that could reduce the impact. One example is moving session garbage collection out of the request cycle and running it on a fixed schedule. I haven’t explored those options myself. As things stand today, the safest approach is to simply avoid the file session driver for anything that needs to hold up under load.
+
+For production, especially on public-facing apps, I’d treat the file session driver as local-only. It’s fine for development. Once real traffic is involved, moving sessions to something like Redis removes this entire class of problem.
+
+# Final thoughts
+This issue sits in a strange middle ground between configuration and security. It depends on a specific set of conditions and most apps will never hit it. But when those conditions do line up, the impact can cause a real headache.
+
+Most applications will never run into this. Still, it highlights a real risk when the file session driver is used in production. Availability is a security concern too. Persistent failure modes are worth understanding, even when they come from reasonable design choices. Long session lifetimes combined with adversarial traffic can lead to some unexpected outcomes. Filesystem-backed sessions tend to work best in low-traffic, trusted environments.
+
+As mentioned earlier, I shared this with Taylor, and he said he would think about how best to warn users about the trade-offs involved. Beyond that, while theoretical fixes exist, they may be hard to justify given how narrow the conditions are.
+
+The goal here was simple. This happened to me in the real world. I dug into it, understood what was going on, and thought it was worth sharing. And thanks to Taylor for the quick and thoughtful response, especially on something security-related.
