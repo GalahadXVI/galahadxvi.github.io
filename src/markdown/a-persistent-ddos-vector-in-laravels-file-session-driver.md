@@ -7,6 +7,8 @@ og-image: og-image-file-session.jpg
 
 In an earlier post, I mentioned a large-scale DDoS attack against one of my applications and a performance issue that took far longer to fully understand than it should have. At the time, I mostly wrote it off as an unfortunate configuration choice and moved on. Recently, out of curiosity, I went back to that incident to see if I could reproduce the behaviour in isolation and try to understand what is actually causing it to happen.
 
+What I found is that someone can cause real disruption on a site using the file session driver by leaning on how session garbage collection works.
+
 The core issue is that the file session garbage collector runs synchronously as part of the request lifecycle and performs an O(n) directory scan over every session file on disk. That means the cost of cleanup grows directly with the number of session files present. An attacker does not need to do anything particularly clever here. By sending a high volume of requests without session cookies, they can force Laravel to create a new session file on every request.
 
 Over time, this fills `storage/framework/sessions` with hundreds of thousands or even millions of files, all sitting in a single flat directory. Once that state exists on disk, the damage lingers. Even after the attack traffic stops, normal requests continue to trigger garbage collection runs that now have to scan an enormous directory. The result is that every unlucky request that hits the GC path pays that full cost.
