@@ -7,25 +7,25 @@ og-image: og-image-file-session.jpg
 
 In an earlier post, I mentioned a large-scale DDoS attack against one of my applications and a performance issue that took far longer to fully understand than it should have. At the time, I mostly wrote it off as an unfortunate configuration choice and moved on. Recently, out of curiosity, I went back to that incident to see if I could reproduce the behaviour in isolation and try to understand what is actually causing it to happen.
 
-What I found is that someone can cause real disruption on a site using the file session driver by leaning on how session garbage collection works.
+What I found is that someone can cause real disruption on a site that uses the file session driver by relying on how session garbage collection works.
 
-The core issue is that the file session garbage collector runs synchronously as part of the request lifecycle and performs an O(n) directory scan over every session file on disk. That means the cost of cleanup grows directly with the number of session files present. An attacker does not need to do anything particularly clever here. By sending a high volume of requests without session cookies, they can force Laravel to create a new session file on every request.
+The core issue is that the file session garbage collector runs synchronously during the request lifecycle and performs an O(n) scan over every session file on disk. The cost of cleanup grows directly with the number of session files present. An attacker doesn’t need to do anything clever. By sending a large number of requests without session cookies, they can force Laravel to create hundreds of thousands, or even millions, of session files.
 
-Over time, this fills `storage/framework/sessions` with hundreds of thousands or even millions of files, all sitting in a single flat directory. Once that state exists on disk, the damage lingers. Even after the attack traffic stops, normal requests continue to trigger garbage collection runs that now have to scan an enormous directory. The result is that every unlucky request that hits the GC path pays that full cost.
+As `storage/framework/sessions` fills up, all of those files sit in a single flat directory. When the garbage collection runs, it scans every file in that directory. Even after the attack traffic stops, normal requests still trigger garbage collection. Each unlucky request that hits that path pays the full cost of scanning the entire directory.
 
-This is technically working as designed, but the important detail is the persistence of the impact.
+While this is all working as designed, what makes this problem unique is that the slowdown is that persists long after the attack finishes.
 
 ## Why The Degradation Persists
 
-What makes this problem unusual is that the slowdown is no longer driven by live traffic. It’s driven by what that traffic leaves behind on disk. A short burst of requests can push the app into a bad state that sticks around long after the traffic stops. Once the session directory reaches that point, normal requests are enough to keep triggering costly cleanup work.
-
-In simple terms, someone can hit the site for a few minutes and cause chaos for hours. Each time the session garbage collection runs, Laravel has to scan the entire session directory. This happens even when almost no files are actually removed. That scan runs inside the request cycle, so requests get blocked. CPU usage spikes, responses slow down or time out, and the app stays unhealthy until the sessions expire naturally or someone cleans them up by hand.
-
-This comes from how Laravel creates and cleans up sessions during a request. If a request arrives without a valid session cookie, the `StartSession` middleware creates a new session ID. At the end of the request, that session is written to disk through `saveSession`. There is no throttling here. Every stateless request creates a new file in `storage/framework/sessions`.
+This happens due to how Laravel creates and cleans up sessions during a request. If a request arrives without a valid session cookie, the `StartSession` middleware creates a new session ID. At the end of the request, that session is written to disk through `saveSession`. There is no throttling here. Every stateless request creates a new file in `storage/framework/sessions`.
 
 On every request, Laravel runs a simple random check known as the session lottery. By default, around 2% of requests trigger garbage collection. When a request is selected, the file session handler runs its gc method synchronously. That 2% sounds small, but it adds up fast. This applies to every request that passes through the session middleware. Even a site with low traffic can hit this regularly, often every minute or so. And once the session directory has grown large, each of those runs is expensive.
 
 That method uses the Symfony Finder to scan the entire session directory, check file modification times, and then delete expired sessions. The key detail is that the full directory scan happens before any deletion. The cost grows linearly with the total number of session files. Even if only a handful of files are expired, the scan still walks every file. Since this runs inline during the request, users feel the latency right away. And once the directory gets large enough, everyday traffic is enough to keep the app stuck in this degraded state.
+
+A short burst of requests can push the app into a bad state that sticks around long after the traffic stops. Once the session directory reaches that point, normal requests are enough to keep triggering costly cleanup work.
+
+In simple terms, someone can hit the site for a few minutes and cause chaos for hours. Each time the session garbage collection runs, Laravel has to scan the entire session directory. This happens even when almost no files are actually removed. That scan runs inside the request cycle, so requests get blocked. CPU usage spikes, responses slow down or time out, and the app stays unhealthy until the sessions expire naturally or someone cleans them up by hand.
 
 ## Reproducing The Issue
 
