@@ -35,9 +35,9 @@ To reach that point, I started with a new Laravel project and confirmed the sess
 
 Next, I forced the session lottery to run on every request by setting it to `[1,1]`. This setup is not realistic for production, but with enough traffic, the default lottery value of `[2,100]` would still trigger cleanup on a regular basis. With that configuration in place, loading the page locally produced a response time of **2.13 seconds**. Under normal conditions, the same request completed in about 41ms. That’s roughly a 5,100% increase in latency.
 
-What stands out is that even modest repeated traffic can push the system into this degraded state. The key issue is that the impact remains after the traffic stops. Around 200,000 session files is not an extreme number. It's been reported that the average DDoS attack sends [240,000 requests _per second_](https://www.imperva.com/blog/81-increase-in-large-volume-ddos-attacks/). Despite this, scanning just 200,000 files during the garbage collection process on a local environment is enough to cause very noticeable slowdowns.  
+What stands out is that even modest repeated traffic can push the system into this degraded state. The key issue is that the impact remains after the traffic stops. Scanning just 200,000 files during the garbage collection process on a local environment is enough to cause very noticeable slowdowns. 200,000 files is also not an extreme number. It's been reported that the average DDoS attack sends [240,000 requests _per second_](https://www.imperva.com/blog/81-increase-in-large-volume-ddos-attacks/). If they are stateless (and they usually are), that is 240,000 new session files created every second.  
 
-In practice, a site using the file session driver could take a serious performance hit for hours after a short burst of traffic. A simple command like `ab -n 100000 -c 10 https://www.yourwebsite.com` could be enough to leave the application struggling long after those requests have finished.
+In practice, a site using the file session driver could take a serious performance hit for hours after a short burst of traffic. A simple command like `ab -n 1000000 -c 10 https://www.yourwebsite.com` could be enough to leave the application struggling long after those requests have finished.
 
 ## Why This Matters
 
