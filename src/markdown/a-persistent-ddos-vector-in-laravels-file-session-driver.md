@@ -25,7 +25,7 @@ That method uses the Symfony Finder to scan the entire session directory, check 
 
 A short burst of requests can push the app into a bad state that sticks around long after the traffic stops. Once the session directory reaches that point, normal requests are enough to keep triggering costly cleanup work.
 
-In simple terms, someone can hit the site for a few minutes and cause chaos for hours. Each time the session garbage collection runs, Laravel has to scan the entire session directory. This happens even when almost no files are actually removed. That scan runs inside the request cycle, so requests get blocked. CPU usage spikes, responses slow down or time out, and the app stays unhealthy until the sessions expire naturally or someone cleans them up by hand.
+In simple terms, someone can hit the site for a few minutes and cause chaos for hours. Each time the session garbage collection runs, Laravel has to scan the entire session directory. That scan runs inside the request cycle, so requests get blocked. CPU usage spikes, responses slow down or time out, and the app stays unhealthy until the sessions expire naturally or someone cleans them up by hand.
 
 ## Reproducing The Issue
 
